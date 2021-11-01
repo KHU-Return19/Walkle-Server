@@ -19,11 +19,13 @@ router.post('/register',(req,res)=>{
         if(err){
             return res.json({success:false,msg:err})
         }else if(user){
+            console.log(user);
             return res.json({success:false,msg:"존재하는 계정"})
         }else{
             const user=new User(req.body);
             user.save((err,doc)=>{
                 if(err){
+                    console.log("에러")
                     return res.json({success:false,msg:err})
                 }else{
                     return res.json({
