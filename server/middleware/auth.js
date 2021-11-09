@@ -2,7 +2,6 @@ const { User } = require('../models/User');
 
 const auth = (req, res, next) => {
   var token = req.cookies.auth;
-    console.log(token);
   User.findByToken(token, (err, user) => {
     if (err) throw err;
     if (!user){

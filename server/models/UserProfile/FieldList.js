@@ -1,7 +1,7 @@
 const mongoose=require('mongoose');
 
 const fieldlistSchema=mongoose.Schema({
-    fieldid:{
+    field_uid:{
         type:mongoose.Schema.Types.ObjectId,
         ref:'Field',
     },
@@ -10,5 +10,6 @@ const fieldlistSchema=mongoose.Schema({
         required:true,
     }
 })
-module.exports={fieldlistSchema};
+const FieldList=mongoose.model('FieldList',fieldlistSchema);
+module.exports={FieldList};
 

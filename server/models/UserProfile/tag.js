@@ -1,14 +1,14 @@
 const mongoose=require('mongoose');
 
 const tagSchema=mongoose.Schema({
-    profileid:{
+    user_uid:{
         type:mongoose.Schema.Types.ObjectId,
-        ref:'Profile',
+        ref:'User',
     },
     tag:{
         type:String,
         required:true,
     }
 });
-
-module.exports={tagSchema};
+const Tag=mongoose.model('Tag',tagSchema);
+module.exports={Tag};

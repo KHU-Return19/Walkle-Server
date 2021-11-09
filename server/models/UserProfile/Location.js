@@ -1,9 +1,9 @@
 const mongoose=require('mongoose');
 
 const locationSchema=mongoose.Schema({
-    profileid:{
+    user_uid:{
         type:mongoose.Schema.Types.ObjectId,
-        ref:'Profile',
+        ref:'User',
     },
     lat:{
         type:Number,
@@ -13,5 +13,5 @@ const locationSchema=mongoose.Schema({
         required:true,
     }
 })
-
-module.exports={locationSchema};
+const Location=mongoose.model('Location',locationSchema);
+module.exports={Location};
