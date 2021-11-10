@@ -59,19 +59,16 @@ boardSchema.methods.updateView = function (cb) {
   return cb();
 };
 
-boardSchema.statics.getObjectIdByNo = function (no, cb) {
+boardSchema.statics.findByNo = function (no, cb) {
   var board = this;
   board.findOne({ no: no }, (err, founded) => {
     if (err) {
-      return cb(err);
+      cb(err);
     } else {
-      if (!founded) {
-        return cb(null, null);
-      } else {
-        return cb(null, founded._id);
-      }
+      return cb(null, founded);
     }
   });
 };
+
 const Board = mongoose.model("Board", boardSchema);
 module.exports = { Board };
