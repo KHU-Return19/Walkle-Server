@@ -1,22 +1,18 @@
 const mongoose = require('mongoose');
 
 const profileSchema = mongoose.Schema({
+    user_uid:{
+        type:mongoose.Schema.Types.ObjectId,
+        ref:'User',
+    },
     nickname:{
         type:String,
+        unique: true,
         required:true,
     },
     job:{
         type:String,
     },
-    // location:{
-
-    // },
-    // field:{
-
-    // },
-    // tag:{
-
-    // }
     sns_link:{
         type:String
     },
@@ -40,4 +36,5 @@ const profileSchema = mongoose.Schema({
         type:String,
     }
 })
-module.exports = { profileSchema }
+const Profile=mongoose.model('Profile',profileSchema);
+module.exports = { Profile };

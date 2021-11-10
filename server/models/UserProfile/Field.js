@@ -1,10 +1,10 @@
 const mongoose=require('mongoose');
 
 const fieldSchema=mongoose.Schema({
-    profileid:{
+    user_uid:{
         type:mongoose.Schema.Types.ObjectId,
-        ref:'Profile',
+        ref:'User',
     },
 })
-
-module.exports={fieldSchema};
+const Field=mongoose.model('Field',fieldSchema);
+module.exports={Field};
