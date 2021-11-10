@@ -2,7 +2,11 @@ const mongoose=require('mongoose');
 
 const fieldSchema=mongoose.Schema({
 <<<<<<< HEAD
+<<<<<<< HEAD
     profile_uid:{
+=======
+    user_uid:{
+>>>>>>> feature/profile
 =======
     user_uid:{
 >>>>>>> feature/profile
