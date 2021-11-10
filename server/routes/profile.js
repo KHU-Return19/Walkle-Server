@@ -37,7 +37,7 @@ const getData = (req) => {
 
 }
 //프로필 등록
-router.post('/',auth, (req, res) => {
+router.post('/', auth, (req, res) => {
     const { profile_data, location_data, field_data, tag_data } = getData(req);
     const profile = new Profile(profile_data);
     const location = new Location(location_data);
@@ -65,10 +65,10 @@ router.post('/',auth, (req, res) => {
                                     }
                                 })
                             })
-                            field.save((err,result) => {
+                            field.save((err, result) => {
                                 if (err) {
                                     return res.status(400).json({ success: false, msg: "분야 저장 실패" });
-                                } else if(result){
+                                } else if (result) {
                                     req.body.field.forEach((item) => {
                                         var field_list = new FieldList({
                                             field_uid: result._id,
@@ -91,67 +91,134 @@ router.post('/',auth, (req, res) => {
         }
     })
 })
-//프로필 수정
-router.post('/:nickname', auth,(req, res) => {
-    const { profile_data, location_data, field_data, tag_data } = getData(req);
-    Profile.findOneAndReplace({ nickname: req.params.nickname }, profile_data, { returnDocument: true }, (err, result) => {
+//프로필 조회
+router.get('/:nickname', auth, (req, res) => {
+    var user_data = {};
+    Profile.findOne({ nickname: req.params.nickname }, (err, profile) => {
         if (err) {
             res.status(400).json({ success: false, err });
-        } else if (result) {
-            Location.findOneAndReplace({ user_uid: location_data.user_uid }, location_data, { returnDocument: true }, (err, result) => {
+        } else {
+            user_data = {
+                profile: {
+                    "nickname": profile.nickname,
+                    "job": profile.job,
+                    "intro": profile.intro,
+                    "career": profile.career,
+                    "age": profile.age,
+                    "gender": profile.gender,
+                    "picture": profile.picture
+                }
+            };
+            Location.findOne({ user_uid: profile.user_uid }, (err, location) => {
                 if (err) {
-                    res.status(400).json({ succcess: false, err });
-                } else if (result) {
-                    Tag.deleteMany({ user_uid: tag_data.user_uid }, (err, result) => {
+                    res.status(400).json({ success: false, err });
+                } else {
+                    user_data = { ...user_data, location: { "lat": location.lat, "lon": location.lon } };
+                    Tag.find({ user_uid: profile.user_uid }, (err, tag_data) => {
                         if (err) {
                             res.status(400).json({ success: false, err });
                         } else {
-                            if (tag_data.tag) {
-                                tag_data.tag.forEach((item) => {
-                                    var tag = new Tag({ user_uid: req.user._id, tag: item })
-                                    tag.save((err) => {
-                                        if (err) {
-                                            return res.status(400).json({ success: false, msg: "태그 저장실패" });
-                                        }
-                                    })
-                                })
-                            }
-                            Field.findOne({ user_uid: field_data.user_uid }, (err, result) => {
+                            var tag = new Array();
+                            tag_data.forEach((item) => {
+                                tag.push(item.tag);
+                            })
+                            user_data = { ...user_data, tag };
+                            Field.findOne({ user_uid: profile.user_uid }, (err, field) => {
                                 if (err) {
                                     res.status(400).json({ success: false, err });
-                                } else if (result) {
-                                    FieldList.deleteMany({ field_uid: result._id }, (err, doc) => {
+                                } else {
+                                    FieldList.find({ field_uid: field._id }, (err, field_data) => {
                                         if (err) {
                                             res.status(400).json({ success: false, err });
                                         } else {
-                                            if (req.body.field) {
-                                                req.body.field.forEach((item) => {
-                                                    var field_list = new FieldList({
-                                                        field_uid: result._id,
-                                                        field: item
-                                                    })
-                                                    field_list.save((err) => {
-                                                        if (err) {
-                                                            return res.status(400).json({ success: false, msg: "분야 명칭 저장 실패" });
-                                                        }
-                                                    })
-                                                })
-                                            }
-                                            res.json({ success: true, msg: "프로필 수정 완료" })
+                                            var field = new Array();
+                                            field_data.forEach((item) => {
+                                                field.push(item.field);
+                                            })
+                                            user_data = { ...user_data, field }
+                                            res.json(user_data);
                                         }
                                     })
                                 }
                             })
                         }
                     })
+                }
+            })
+        }
+    })
+})
+//프로필 수정
+router.post('/:nickname', auth, (req, res) => {
+    var user = req.user;
+    Profile.findOne({ nickname: req.params.nickname }, (err, profile) => {
+        if (err) {
+            res.status(400).json({ success: false, err });
+        } else if (user._id.eqauls(profile.user_uid)) {
+            const { profile_data, location_data, field_data, tag_data } = getData(req);
+            Profile.findOneAndReplace({ nickname: req.params.nickname }, profile_data, { returnDocument: true }, (err, result) => {
+                if (err) {
+                    res.status(400).json({ success: false, err });
+                } else if (result) {
+                    Location.findOneAndReplace({ user_uid: location_data.user_uid }, location_data, { returnDocument: true }, (err, result) => {
+                        if (err) {
+                            res.status(400).json({ succcess: false, err });
+                        } else if (result) {
+                            Tag.deleteMany({ user_uid: tag_data.user_uid }, (err, result) => {
+                                if (err) {
+                                    res.status(400).json({ success: false, err });
+                                } else {
+                                    if (tag_data.tag) {
+                                        tag_data.tag.forEach((item) => {
+                                            var tag = new Tag({ user_uid: req.user._id, tag: item })
+                                            tag.save((err) => {
+                                                if (err) {
+                                                    return res.status(400).json({ success: false, msg: "태그 저장실패" });
+                                                }
+                                            })
+                                        })
+                                    }
+                                    Field.findOne({ user_uid: field_data.user_uid }, (err, result) => {
+                                        if (err) {
+                                            res.status(400).json({ success: false, err });
+                                        } else if (result) {
+                                            FieldList.deleteMany({ field_uid: result._id }, (err, doc) => {
+                                                if (err) {
+                                                    res.status(400).json({ success: false, err });
+                                                } else {
+                                                    if (req.body.field) {
+                                                        req.body.field.forEach((item) => {
+                                                            var field_list = new FieldList({
+                                                                field_uid: result._id,
+                                                                field: item
+                                                            })
+                                                            field_list.save((err) => {
+                                                                if (err) {
+                                                                    return res.status(400).json({ success: false, msg: "분야 명칭 저장 실패" });
+                                                                }
+                                                            })
+                                                        })
+                                                    }
+                                                    res.json({ success: true, msg: "프로필 수정 완료" })
+                                                }
+                                            })
+                                        }
+                                    })
+                                }
+                            })
+                        } else {
+                            res.status(400).json({ success: false, msg: "location 수정 실패" });
+                        }
+                    })
                 } else {
-                    res.status(400).json({ success: false, msg: "location 수정 실패" });
+                    res.status(400).json({ success: false, msg: "프로필이 존재하지않음" });
                 }
             })
         } else {
-            res.status(400).json({ success: false, msg: "프로필이 존재하지않음" });
+            res.json({ success: false, msg: "본인 프로필만 수정가능" });
         }
     })
+
 })
 
 
