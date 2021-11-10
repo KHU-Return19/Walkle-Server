@@ -1,5 +1,8 @@
 const mongoose = require("mongoose");
 
+const autoIncrement = require("mongoose-auto-increment");
+autoIncrement.initialize(mongoose.connection);
+
 const boardSchema = mongoose.Schema({
   userId: {
     type: mongoose.Schema.Types.ObjectId,
@@ -21,6 +24,9 @@ const boardSchema = mongoose.Schema({
     type: Number,
     default: 0,
   },
+  no: {
+    type: Number,
+  },
   createdAt: {
     type: Date,
     default: Date.now,
@@ -29,6 +35,13 @@ const boardSchema = mongoose.Schema({
     type: Date,
     default: Date.now,
   },
+});
+
+boardSchema.plugin(autoIncrement.plugin, {
+  model: "board",
+  field: "no",
+  startAt: 1,
+  increment: 1,
 });
 
 boardSchema.methods.updateHeart = function (cb) {

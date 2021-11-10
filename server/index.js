@@ -20,7 +20,6 @@ const connect = mongoose
   .catch((err) => console.log(err));
 
 // Routes
-
 app.use(bodyParser.urlencoded({ extended: true }));
 
 app.use(bodyParser.json());
