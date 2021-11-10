@@ -14,7 +14,6 @@ router.get('/auth',auth,(req,res)=>{
 })
 
 router.post('/register',(req,res)=>{
-    console.log(req.body);
     User.findOne({userid:req.body.userid},(err,user)=>{
         if(err){
             return res.json({success:false,msg:err})
