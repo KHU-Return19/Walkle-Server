@@ -26,6 +26,7 @@ const boardSchema = mongoose.Schema({
   },
   no: {
     type: Number,
+    required: true,
   },
   createdAt: {
     type: Date,
@@ -57,6 +58,20 @@ boardSchema.methods.updateView = function (cb) {
   board.save();
   return cb();
 };
-const Board = mongoose.model("Board", boardSchema);
 
+boardSchema.statics.getObjectIdByNo = function (no, cb) {
+  var board = this;
+  board.findOne({ no: no }, (err, founded) => {
+    if (err) {
+      return cb(err);
+    } else {
+      if (!founded) {
+        return cb(null, null);
+      } else {
+        return cb(null, founded._id);
+      }
+    }
+  });
+};
+const Board = mongoose.model("Board", boardSchema);
 module.exports = { Board };
