@@ -4,7 +4,7 @@ const router = express.Router();
 const { Board } = require("../../models/Community/Board");
 
 const { auth } = require("../../middleware/auth");
-const { communityPermission } = require("../../middleware/permission");
+const { boardPermission } = require("../../middleware/communityPermission");
 
 router.get("/", auth, (req, res) => {
   let userId = req.query.userId;
@@ -61,7 +61,7 @@ router.post("/", auth, (req, res) => {
   });
 });
 
-router.put("/:no", auth, communityPermission, (req, res) => {
+router.put("/:no", auth, boardPermission, (req, res) => {
   // upate
   let board = req.board;
   board.update(
@@ -82,13 +82,13 @@ router.put("/:no", auth, communityPermission, (req, res) => {
   );
 });
 
-router.delete("/:no", auth, communityPermission, (req, res) => {
+router.delete("/:no", auth, boardPermission, (req, res) => {
   let board = req.board;
-  board.remove((err, deleted) => {
+  board.delete((err, deleted) => {
     if (err) {
       return res.status(400).json({ msg: err });
     } else {
-      return res.status(204).json();
+      return res.status(204).json({ boardNo: board.no });
     }
   });
 });

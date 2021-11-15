@@ -32,11 +32,22 @@ const commentSchema = mongoose.Schema({
   },
 });
 commentSchema.plugin(autoIncrement.plugin, {
-  model: "board",
+  model: "comment",
   field: "no",
   startAt: 1,
   increment: 1,
 });
+
+commentSchema.statics.findByNo = function (no, cb) {
+  var comment = this;
+  comment.findOne({ no: no }, (err, founded) => {
+    if (err) {
+      cb(err);
+    } else {
+      return cb(null, founded);
+    }
+  });
+};
 
 const Comment = mongoose.model("Comment", commentSchema);
 module.exports = { Comment };

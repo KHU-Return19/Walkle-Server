@@ -20,10 +20,6 @@ const boardSchema = mongoose.Schema({
     type: Number,
     default: 0,
   },
-  heart: {
-    type: Number,
-    default: 0,
-  },
   no: {
     type: Number,
     required: true,

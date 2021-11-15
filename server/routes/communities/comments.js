@@ -5,24 +5,18 @@ const { Board } = require("../../models/Community/Board");
 const { Comment } = require("../../models/Community/Comment");
 
 const { auth } = require("../../middleware/auth");
-const { Types } = require("mongoose");
-
-// Comment
+const { commentPermission } = require("../../middleware/communityPermission");
 
 router.get("/", auth, (req, res) => {
-  console.log(req.query.boardNo);
   Board.findOne({ no: req.query.boardNo }, (err, board) => {
     if (err) {
-      return res.json({ success: false, msg: err });
+      return res.json({ msg: err });
     } else {
       if (!board) {
-        return res
-          .status(404)
-          .json({ succress: false, msg: "Board Not Found" });
+        return res.status(400).json({ msg: "Board Not Found" });
       } else {
         Comment.find({ boardId: board._id }, (err, comments) => {
           return res.json({
-            success: true,
             comments: comments,
             len: comments.length,
           });
@@ -36,12 +30,10 @@ router.post("/", auth, (req, res) => {
   let userId = req.user._id;
   Board.findByNo(req.query.boardNo, (err, board) => {
     if (err) {
-      return res.json({ success: false, msg: err });
+      return res.status(400).json({ msg: err });
     } else {
       if (!board) {
-        return res
-          .status(404)
-          .json({ succress: false, msg: "Board Not Found" });
+        return res.status(400).json({ msg: "Board Not Found" });
       } else {
         let newComment = new Comment({
           boardId: board._id,
@@ -50,11 +42,10 @@ router.post("/", auth, (req, res) => {
         });
         newComment.save((err, data) => {
           if (err) {
-            return res.json({ success: false, msg: err });
+            return res.satus(400).json({ msg: err });
           } else {
             return res.json({
-              success: true,
-              msg: "Create new Comment",
+              commentNo: newComment.no,
             });
           }
         });
@@ -63,58 +54,30 @@ router.post("/", auth, (req, res) => {
   });
 });
 
-router.put("/:no", auth, (req, res) => {
-  let userId = new Types.ObjectId(req.user._id);
-  Comment.findOne({ no: req.params.no }, (err, comment) => {
-    if (err) {
-      return res.json({ success: false, msg: err });
-    } else {
-      if (!comment) {
-        return res
-          .status(404)
-          .json({ succress: false, msg: "Comment Not Found" });
-      } else if (!userId.equals(comment.userId)) {
-        return res.status(403).json({ succress: false, msg: "No Permission" });
+router.put("/:no", auth, commentPermission, (req, res) => {
+  let comment = req.comment;
+  comment.update(
+    {
+      content: req.body.content,
+      updateAt: Date.now(),
+    },
+    (err, updated) => {
+      if (err) {
+        return res.status(400).json({ msg: err });
       } else {
-        comment.update(
-          {
-            content: req.body.content,
-            updateAt: Date.now(),
-          },
-          (err, board) => {
-            if (err) {
-              return res.json({ success: false, msg: err });
-            } else {
-              return res.json({ success: true });
-            }
-          }
-        );
+        return res.json({ commentNo: comment.no });
       }
     }
-  });
+  );
 });
 
-router.delete("/:no", auth, (req, res) => {
-  let userId = new Types.ObjectId(req.user._id);
-  Comment.findOne({ no: req.params.no }, (err, comment) => {
+router.delete("/:no", auth, commentPermission, (req, res) => {
+  let comment = req.comment;
+  comment.delete((err, board) => {
     if (err) {
-      return res.json({ success: false, msg: err });
+      return res.status(400).json({ msg: err });
     } else {
-      if (!comment) {
-        return res
-          .status(404)
-          .json({ succress: false, msg: "Comment Not Found" });
-      } else if (!userId.equals(comment.userId)) {
-        return res.status(403).json({ succress: false, msg: "No Permission" });
-      } else {
-        comment.delete((err, board) => {
-          if (err) {
-            return res.json({ success: false, msg: err });
-          } else {
-            return res.json({ success: true });
-          }
-        });
-      }
+      return res.status(204).json();
     }
   });
 });
