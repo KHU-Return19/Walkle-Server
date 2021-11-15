@@ -4,14 +4,14 @@ const router = express.Router();
 const { Board } = require("../../models/Community/Board");
 
 const { auth } = require("../../middleware/auth");
+const { communityPermission } = require("../../middleware/permission");
 const { Types } = require("mongoose");
 
-// Boards
 router.get("/", auth, (req, res) => {
-  let myboard = req.query.myboard;
+  let userId = req.query.userId;
 
-  if (myboard) {
-    let userId = req.user._id;
+  if (userId) {
+    // find by userId
     Board.find({ userId: userId }, (err, boards) => {
       if (err) {
         return res.json({ success: false, msg: err });
@@ -20,6 +20,7 @@ router.get("/", auth, (req, res) => {
       }
     });
   } else {
+    // find all
     Board.find((err, boards) => {
       if (err) {
         return res.json({ success: false, msg: err });
@@ -31,6 +32,7 @@ router.get("/", auth, (req, res) => {
 });
 
 router.get("/:no", auth, (req, res) => {
+  // find by board Id
   Board.findOne({ no: req.params.no }, (err, board) => {
     if (err) {
       return res.json({ success: false, msg: err });
@@ -87,38 +89,23 @@ router.put("/hearts/:no", auth, (req, res) => {
   });
 });
 
-router.put("/:no", auth, (req, res) => {
-  let userId = new Types.ObjectId(req.user._id);
-  Board.findByNo(req.params.no, (err, board) => {
-    if (err) {
-      return res.json({ success: false, msg: err });
-    } else {
-      if (!board) {
-        return res
-          .status(404)
-          .json({ succress: false, msg: "Board Not Found" });
-      } else if (!userId.equals(board.userId)) {
-        console.log(userId);
-        console.log(board.userId);
-        return res.status(403).json({ succress: false, msg: "No Permission" });
+router.put("/:no", auth, communityPermission, (req, res) => {
+  // upate
+  let board = req.board;
+  board.update(
+    {
+      title: req.body.title,
+      content: req.body.content,
+      updateAt: Date.now(),
+    },
+    (err, updated) => {
+      if (err) {
+        return res.json({ success: false, msg: err });
       } else {
-        board.update(
-          {
-            title: req.body.title,
-            content: req.body.content,
-            updateAt: Date.now(),
-          },
-          (err, board) => {
-            if (err) {
-              return res.json({ success: false, msg: err });
-            } else {
-              return res.json({ success: true });
-            }
-          }
-        );
+        return res.json({ success: true });
       }
     }
-  });
+  );
 });
 
 router.delete("/:no", auth, (req, res) => {
