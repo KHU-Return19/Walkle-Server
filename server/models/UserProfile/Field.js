@@ -5,6 +5,10 @@ const fieldSchema=mongoose.Schema({
         type:mongoose.Schema.Types.ObjectId,
         ref:'User',
     },
+    field:{
+        type:mongoose.Schema.Types.ObjectId,
+        ref:'FieldList'
+    }
 })
 const Field=mongoose.model('Field',fieldSchema);
 module.exports={Field};
