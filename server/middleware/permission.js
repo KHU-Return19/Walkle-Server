@@ -9,9 +9,9 @@ const communityPermission = (req, res, next) => {
   Board.findByNo(communityNo, (err, board) => {
     if (err) throw err;
     if (!board) {
-      return res.status(404).json({ succress: false, msg: "Board Not Found" });
+      return res.status(400).json({ msg: err });
     } else if (!userId.equals(board.userId)) {
-      return res.status(403).json({ succress: false, msg: "No Permission" });
+      return res.status(403).json({ msg: "No Permission" });
     } else {
       req.board = board;
       next();
