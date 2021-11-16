@@ -7,6 +7,7 @@ const { auth } = require("../../middleware/auth");
 const { boardPermission } = require("../../middleware/communityPermission");
 
 router.get("/", auth, (req, res) => {
+  // user Input
   let userId = req.query.userId;
 
   if (userId) {
@@ -30,9 +31,9 @@ router.get("/", auth, (req, res) => {
   }
 });
 
-router.get("/:no", auth, (req, res) => {
+router.get("/:id", auth, (req, res) => {
   // find by board Id
-  Board.findOne({ no: req.params.no }, (err, board) => {
+  Board.findOne({ id: req.params.id }, (err, board) => {
     if (err) {
       return res.status(400).json({ msg: err });
     } else if (!board) {
@@ -46,7 +47,7 @@ router.get("/:no", auth, (req, res) => {
 });
 
 router.post("/", auth, (req, res) => {
-  let userId = req.user._id;
+  let userId = req.user.id;
   let newBoard = new Board({
     title: req.body.title,
     content: req.body.content,
@@ -56,12 +57,12 @@ router.post("/", auth, (req, res) => {
     if (err) {
       return res.status(400).json({ msg: err });
     } else {
-      return res.status(201).json({ boardNo: newBoard.no });
+      return res.status(201).json({ boardId: newBoard.id });
     }
   });
 });
 
-router.put("/:no", auth, boardPermission, (req, res) => {
+router.put("/:id", auth, boardPermission, (req, res) => {
   // upate
   let board = req.board;
   board.update(
@@ -75,20 +76,20 @@ router.put("/:no", auth, boardPermission, (req, res) => {
         return res.status(400).json({ msg: err });
       } else {
         return res.json({
-          boardNo: board.no,
+          boardId: board.id,
         });
       }
     }
   );
 });
 
-router.delete("/:no", auth, boardPermission, (req, res) => {
+router.delete("/:id", auth, boardPermission, (req, res) => {
   let board = req.board;
   board.delete((err, deleted) => {
     if (err) {
       return res.status(400).json({ msg: err });
     } else {
-      return res.status(204).json({ boardNo: board.no });
+      return res.status(204).json({ boardId: board.id });
     }
   });
 });

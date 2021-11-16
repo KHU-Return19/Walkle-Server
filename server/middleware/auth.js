@@ -8,7 +8,7 @@ const auth = (req, res, next) => {
     if (!user) {
       return res.json({
         isAuth: false,
-        msg: "인증 실패 :P",
+        msg: "authentication failed",
       });
     } else {
       req.user = user;

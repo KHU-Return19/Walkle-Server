@@ -8,27 +8,21 @@ const { auth } = require("../../middleware/auth");
 const { commentPermission } = require("../../middleware/communityPermission");
 
 router.get("/", auth, (req, res) => {
-  Board.findOne({ no: req.query.boardNo }, (err, board) => {
+  Comment.find({ boardId: req.query.boardId }, (err, comments) => {
     if (err) {
-      return res.json({ msg: err });
+      return res.status(400).json({ msg: err });
     } else {
-      if (!board) {
-        return res.status(400).json({ msg: "Board Not Found" });
-      } else {
-        Comment.find({ boardId: board._id }, (err, comments) => {
-          return res.json({
-            comments: comments,
-            len: comments.length,
-          });
-        });
-      }
+      return res.json({
+        comments: comments,
+        len: comments.length,
+      });
     }
   });
 });
 
 router.post("/", auth, (req, res) => {
-  let userId = req.user._id;
-  Board.findByNo(req.query.boardNo, (err, board) => {
+  let userId = req.user.id;
+  Board.findOne({ id: req.query.boardId }, (err, board) => {
     if (err) {
       return res.status(400).json({ msg: err });
     } else {
@@ -36,7 +30,7 @@ router.post("/", auth, (req, res) => {
         return res.status(400).json({ msg: "Board Not Found" });
       } else {
         let newComment = new Comment({
-          boardId: board._id,
+          boardId: board.id,
           content: req.body.content,
           userId: userId,
         });
@@ -45,7 +39,7 @@ router.post("/", auth, (req, res) => {
             return res.satus(400).json({ msg: err });
           } else {
             return res.json({
-              commentNo: newComment.no,
+              commentId: newComment.id,
             });
           }
         });
@@ -54,7 +48,7 @@ router.post("/", auth, (req, res) => {
   });
 });
 
-router.put("/:no", auth, commentPermission, (req, res) => {
+router.put("/:id", auth, commentPermission, (req, res) => {
   let comment = req.comment;
   comment.update(
     {
@@ -65,13 +59,13 @@ router.put("/:no", auth, commentPermission, (req, res) => {
       if (err) {
         return res.status(400).json({ msg: err });
       } else {
-        return res.json({ commentNo: comment.no });
+        return res.json({ commentId: comment.id });
       }
     }
   );
 });
 
-router.delete("/:no", auth, commentPermission, (req, res) => {
+router.delete("/:id", auth, commentPermission, (req, res) => {
   let comment = req.comment;
   comment.delete((err, board) => {
     if (err) {

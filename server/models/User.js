@@ -1,8 +1,15 @@
 const mongoose = require("mongoose");
 const bcrypt = require("bcrypt");
 const jwt = require("jsonwebtoken");
+const autoIncrement = require("mongoose-auto-increment");
+autoIncrement.initialize(mongoose.connection);
+
 const userSchema = mongoose.Schema({
-  userid: {
+  id: {
+    type: Number,
+    required: true,
+  },
+  userId: {
     type: String,
     maxlength: 30,
   },
@@ -16,6 +23,7 @@ const userSchema = mongoose.Schema({
     type: String,
   },
 });
+
 userSchema.pre("save", function (next) {
   var user = this;
   if (user.isModified("password")) {
@@ -37,6 +45,14 @@ userSchema.pre("save", function (next) {
     next();
   }
 });
+
+userSchema.plugin(autoIncrement.plugin, {
+  model: "user",
+  field: "id",
+  startAt: 1,
+  increment: 1,
+});
+
 userSchema.methods.checkPassword = function (plainPassword, cb) {
   var user = this;
   bcrypt.compare(plainPassword, user.password, (err, isMatch) => {

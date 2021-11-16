@@ -4,22 +4,22 @@ const autoIncrement = require("mongoose-auto-increment");
 autoIncrement.initialize(mongoose.connection);
 
 const commentSchema = mongoose.Schema({
+  id: {
+    type: Number,
+    required: true,
+  },
   userId: {
-    type: mongoose.Schema.Types.ObjectId,
+    type: Number,
     ref: "User",
     required: true,
   },
   boardId: {
-    type: mongoose.Schema.Types.ObjectId,
+    type: Number,
     ref: "Board",
     required: true,
   },
   content: {
     type: String,
-    required: true,
-  },
-  no: {
-    type: Number,
     required: true,
   },
   createdAt: {
@@ -33,21 +33,10 @@ const commentSchema = mongoose.Schema({
 });
 commentSchema.plugin(autoIncrement.plugin, {
   model: "comment",
-  field: "no",
+  field: "id",
   startAt: 1,
   increment: 1,
 });
-
-commentSchema.statics.findByNo = function (no, cb) {
-  var comment = this;
-  comment.findOne({ no: no }, (err, founded) => {
-    if (err) {
-      cb(err);
-    } else {
-      return cb(null, founded);
-    }
-  });
-};
 
 const Comment = mongoose.model("Comment", commentSchema);
 module.exports = { Comment };

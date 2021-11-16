@@ -4,8 +4,12 @@ const autoIncrement = require("mongoose-auto-increment");
 autoIncrement.initialize(mongoose.connection);
 
 const boardSchema = mongoose.Schema({
+  id: {
+    type: Number,
+    required: true,
+  },
   userId: {
-    type: mongoose.Schema.Types.ObjectId,
+    type: Number,
     ref: "User",
     required: true,
   },
@@ -20,10 +24,6 @@ const boardSchema = mongoose.Schema({
     type: Number,
     default: 0,
   },
-  no: {
-    type: Number,
-    required: true,
-  },
   createdAt: {
     type: Date,
     default: Date.now,
@@ -36,7 +36,7 @@ const boardSchema = mongoose.Schema({
 
 boardSchema.plugin(autoIncrement.plugin, {
   model: "board",
-  field: "no",
+  field: "id",
   startAt: 1,
   increment: 1,
 });
@@ -53,17 +53,6 @@ boardSchema.methods.updateView = function (cb) {
   board.view++;
   board.save();
   return cb();
-};
-
-boardSchema.statics.findByNo = function (no, cb) {
-  var board = this;
-  board.findOne({ no: no }, (err, founded) => {
-    if (err) {
-      cb(err);
-    } else {
-      return cb(null, founded);
-    }
-  });
 };
 
 const Board = mongoose.model("Board", boardSchema);
