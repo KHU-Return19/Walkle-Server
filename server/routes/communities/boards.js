@@ -2,33 +2,31 @@ const express = require("express");
 const router = express.Router();
 
 const { Board } = require("../../models/Community/Board");
+const { Heart } = require("../../models/Community/Heart");
 
 const { auth } = require("../../middleware/auth");
 const { boardPermission } = require("../../middleware/communityPermission");
 
 router.get("/", auth, (req, res) => {
-  // user Input
-  let userId = req.query.userId;
+  // find all
+  Board.find((err, boards) => {
+    if (err) {
+      return res.status(400).json({ msg: err });
+    } else {
+      return res.json({ boards: boards });
+    }
+  });
+});
 
-  if (userId) {
-    // find by userId
-    Board.find({ userId: userId }, (err, boards) => {
-      if (err) {
-        return res.status(400).json({ error: err });
-      } else {
-        return res.json({ boards: boards });
-      }
-    });
-  } else {
-    // find all
-    Board.find((err, boards) => {
-      if (err) {
-        return res.status(400).json({ msg: err });
-      } else {
-        return res.json({ boards: boards });
-      }
-    });
-  }
+router.get("/users", auth, (req, res) => {
+  // find all
+  Board.find({ userId: req.user.id }, (err, boards) => {
+    if (err) {
+      return res.status(400).json({ msg: err });
+    } else {
+      return res.json({ boards: boards });
+    }
+  });
 });
 
 router.get("/:id", auth, (req, res) => {
@@ -53,11 +51,17 @@ router.post("/", auth, (req, res) => {
     content: req.body.content,
     userId: userId,
   });
-  newBoard.save((err, data) => {
+  newBoard.save((err, saved) => {
     if (err) {
       return res.status(400).json({ msg: err });
     } else {
-      return res.status(201).json({ boardId: newBoard.id });
+      Heart.createHeart(userId, saved.id, (err, heart) => {
+        if (err) {
+          return res.status(400).json({ msg: err });
+        } else {
+          return res.status(201).json({ boardId: saved.id });
+        }
+      });
     }
   });
 });

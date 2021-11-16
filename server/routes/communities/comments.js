@@ -14,7 +14,7 @@ router.get("/", auth, (req, res) => {
     } else {
       return res.json({
         comments: comments,
-        len: comments.length,
+        count: comments.length,
       });
     }
   });

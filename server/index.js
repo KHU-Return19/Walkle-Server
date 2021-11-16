@@ -28,6 +28,7 @@ app.use(cookieParser());
 app.use("/api/users", require("./routes/users"));
 app.use("/api/communities/boards", require("./routes/communities/boards"));
 app.use("/api/communities/comments", require("./routes/communities/comments"));
+app.use("/api/communities/hearts", require("./routes/communities/hearts"));
 
 app.listen(port, () => {
   console.log(`Server Listening ${port}`);
