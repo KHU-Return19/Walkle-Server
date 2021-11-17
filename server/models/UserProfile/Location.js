@@ -1,9 +1,9 @@
 const mongoose=require('mongoose');
 
 const locationSchema=mongoose.Schema({
-    profileid:{
+    user_uid:{
         type:mongoose.Schema.Types.ObjectId,
-        ref:'Profile',
+        ref:'User',
     },
     lat:{
         type:Number,
@@ -13,5 +13,17 @@ const locationSchema=mongoose.Schema({
         required:true,
     }
 })
-
-module.exports={locationSchema};
+locationSchema.statics.getlocation = async function(user_uid){
+    var user=this;
+    var res;
+    await this.findOne({user_uid}).then((result)=>{
+        if(result){
+            res=[result.lat,result.lon];
+        }else{
+            res="";
+        }
+    }).catch(err=>{res=err})
+    return res;
+}
+const Location=mongoose.model('Location',locationSchema);
+module.exports={Location};

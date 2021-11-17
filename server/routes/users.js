@@ -14,6 +14,7 @@ router.get("/auth", auth, (req, res) => {
   });
 });
 
+
 router.post("/register", (req, res) => {
   console.log(req.body);
   User.findOne({ userId: req.body.userId }, (err, user) => {
@@ -31,6 +32,7 @@ router.post("/register", (req, res) => {
             success: true,
             msg: "SignUp Success",
           });
+
         }
       });
     }
