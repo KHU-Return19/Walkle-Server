@@ -27,6 +27,31 @@ router.get("/", auth, (req, res) => {
   });
 });
 
+router.get("/search", auth, (req, res) => {
+  // List
+  let keyword = req.query.keyword;
+
+  Board.find({
+    $or: [
+      { title: { $regex: keyword, $options: "i" } },
+      { content: { $regex: keyword, $options: "i" } },
+    ],
+  }).then(async (boards) => {
+    var response = [];
+    for (const board of boards) {
+      response.push({
+        id: board.id,
+        title: board.title,
+        userId: board.userId,
+        createAt: board.createAt,
+        view: board.view,
+        heart: await board.getNumberOfHearts(),
+        comment: await board.getNumberOfComments(),
+      });
+    }
+    return res.json({ boards: response });
+  });
+});
 router.get("/users", auth, (req, res) => {
   // find all
   Board.find({ userId: req.user.id }, (err, boards) => {

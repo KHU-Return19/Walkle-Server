@@ -16,7 +16,7 @@ router.get("/", auth, (req, res) => {
   });
 });
 
-router.get("/users-all", auth, (req, res) => {
+router.get("/bookmarks", auth, (req, res) => {
   Heart.find({ userId: req.user.id, state: true }, (err, hearts) => {
     if (err) {
       return res.status(400).json({ error: err });
