@@ -125,12 +125,13 @@ router.put("/:id", auth, boardPermission, (req, res) => {
 
 router.delete("/:id", auth, boardPermission, (req, res) => {
   let board = req.board;
+  console.log(board);
   board.delete((err, deleted) => {
     if (err) {
       return res.status(400).json({ msg: err });
     } else {
-      Comment.deleteByBoardId(deleted.id);
-      Heart.deleteByBoardId(deleted.id);
+      Comment.deleteByBoardId(deleted.id, (err, deleted) => {});
+      Heart.deleteByBoardId(deleted.id), (err, deleted) => {};
       return res.status(204).json({ boardId: board.id });
     }
   });

@@ -13,9 +13,9 @@ const heartSchema = mongoose.Schema({
     ref: "User",
     required: true,
   },
-  boardId: {
+  projectId: {
     type: Number,
-    ref: "Board",
+    ref: "Project",
     required: true,
   },
   state: {
@@ -35,11 +35,11 @@ heartSchema.plugin(autoIncrement.plugin, {
   increment: 1,
 });
 
-heartSchema.statics.createHeart = function (userId, boardId) {
+heartSchema.statics.createHeart = function (userId, projectId) {
   var Heart = this;
   let newHeart = new Heart({
     userId: userId,
-    boardId: boardId,
+    projectId: projectId,
     state: false,
     updateAt: Date.now(),
   });
@@ -58,8 +58,8 @@ heartSchema.methods.updateHeart = function (cb) {
     }
   });
 };
-heartSchema.statics.deleteByBoardId = function (boardId) {
-  Heart.deleteMany({ boardId: boardId }, (err, deleted) => {});
+heartSchema.statics.deleteByProjectId = function (projectId) {
+  Heart.deleteMany({ projectId: projectId }, (err, deleted) => {});
 };
 const Heart = mongoose.model("Heart", heartSchema);
 module.exports = { Heart };

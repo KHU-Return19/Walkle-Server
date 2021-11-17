@@ -9,7 +9,7 @@ router.get("/", auth, (req, res) => {
 
   Heart.find({ boardId: boardId, state: true }, (err, hearts) => {
     if (err) {
-      return res.status(400).json({ error: err });
+      return res.status(400).json({ msg: err });
     } else {
       return res.json({ hearts: hearts, count: hearts.length });
     }
@@ -19,7 +19,7 @@ router.get("/", auth, (req, res) => {
 router.get("/bookmarks", auth, (req, res) => {
   Heart.find({ userId: req.user.id, state: true }, (err, hearts) => {
     if (err) {
-      return res.status(400).json({ error: err });
+      return res.status(400).json({ msg: err });
     } else {
       return res.json({ hearts: hearts });
     }
@@ -33,7 +33,7 @@ router.get("/users", auth, (req, res) => {
 
   Heart.find({ userId: req.user.id, boardId: boardId }, (err, heart) => {
     if (err) {
-      return res.status(400).json({ error: err });
+      return res.status(400).json({ msg: err });
     } else {
       return res.json({ heart: heart });
     }
@@ -43,9 +43,12 @@ router.get("/users", auth, (req, res) => {
 router.put("/users", auth, (req, res) => {
   let boardId = req.query.boardId;
   Heart.findOne({ userId: req.user.id, boardId: boardId }, (err, heart) => {
+    if (!heart) {
+      return res.status(400).json({ msg: "Heart Not Found" });
+    }
     heart.updateHeart((err, updated) => {
       if (err) {
-        return res.status(400).json({ error: err });
+        return res.status(400).json({ msg: err });
       } else {
         return res.json({ heart: updated });
       }

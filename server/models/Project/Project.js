@@ -2,10 +2,8 @@ const mongoose = require("mongoose");
 
 const autoIncrement = require("mongoose-auto-increment");
 autoIncrement.initialize(mongoose.connection);
-const { Comment } = require("./Comment");
-const { Heart } = require("./Heart");
 
-const boardSchema = mongoose.Schema({
+const projectSchema = mongoose.Schema({
   id: {
     type: Number,
     required: true,
@@ -32,40 +30,39 @@ const boardSchema = mongoose.Schema({
   },
 });
 
-boardSchema.plugin(autoIncrement.plugin, {
-  model: "board",
+projectSchema.plugin(autoIncrement.plugin, {
+  model: "project",
   field: "id",
   startAt: 1,
   increment: 1,
 });
 
-boardSchema.methods.updateView = function (cb) {
-  var board = this;
-  board.view++;
-  board.save();
+projectSchema.methods.updateView = function (cb) {
+  var project = this;
+  project.view++;
+  project.save();
   return cb();
 };
 
-boardSchema.methods.getNumberOfComments = async function () {
+projectdSchema.methods.getNumberOfComments = async function () {
   var data;
-  await Comment.find({ boardId: this.id }).then((comments) => {
+  await Comment.find({ projectId: this.id }).then((comments) => {
     data = comments.length;
   });
   return data;
 };
 
-boardSchema.methods.getNumberOfHearts = async function () {
+projectSchema.methods.getNumberOfHearts = async function () {
   var data;
   await Heart.find({ boardId: this.id, state: true }).then((hearts) => {
     data = hearts.length;
   });
   return data;
 };
-
-boardSchema.methods.getComments = async function () {
+projectSchema.methods.getComments = async function () {
   Comment.find({ boardId: this.id }, (err, comments) => {
     return comments;
   });
 };
-const Board = mongoose.model("Board", boardSchema);
-module.exports = { Board };
+const Project = mongoose.model("Project", projectSchema);
+module.exports = { Project };
