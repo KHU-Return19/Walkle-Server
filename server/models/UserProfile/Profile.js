@@ -1,5 +1,4 @@
 const mongoose = require('mongoose');
-
 const profileSchema = mongoose.Schema({
     user_uid:{
         type:mongoose.Schema.Types.ObjectId,
@@ -36,5 +35,18 @@ const profileSchema = mongoose.Schema({
         type:String,
     }
 })
+
+profileSchema.statics.getnickname = async function(user_uid){
+    var user=this;
+    var res;
+    await this.findOne({user_uid}).then((result)=>{
+        if(result){
+            res=result.nickname;
+        }else{
+            res="";
+        }
+    }).catch(err=>{res=err})
+    return res;
+}
 const Profile=mongoose.model('Profile',profileSchema);
 module.exports = { Profile };

@@ -8,7 +8,6 @@ const { Location } = require('../models/UserProfile/Location');
 const { Profile } = require('../models/UserProfile/Profile');
 const { Tag } = require('../models/UserProfile/Tag');
 const { auth } = require('../middleware/auth'); //인증
-
 const getData = (req) => {
     const profile_data = {
         user_uid: req.user._id,
@@ -27,7 +26,8 @@ const getData = (req) => {
         lon: req.body.lon
     };
     const field_data = {
-        user_uid: req.user._id
+        user_uid: req.user._id,
+        field: req.body.field
     };
     const tag_data = {
         user_uid: req.user._id,
@@ -36,54 +36,65 @@ const getData = (req) => {
     return { profile_data, location_data, field_data, tag_data }
 
 }
+// getnickanme,getlocation 테스트코드
+// router.get('/',auth,async (req,res)=>{
+    // var user=req.user;
+    // console.log(await Profile.getnickname(user._id));
+    // console.log(await Location.getlocation(user._id));
+// })
+
+
+
 //프로필 등록
 router.post('/', auth, (req, res) => {
     const { profile_data, location_data, field_data, tag_data } = getData(req);
     const profile = new Profile(profile_data);
     const location = new Location(location_data);
-    const field = new Field(field_data);
+
     //DB에 프로필이 등록되어 있는지 확인.
     Profile.findOne({ user_uid: req.user._id }, (err, result) => {
         if (err) {
-            res.status(400).json({ success: false, err });
+            res.status(400).json({ msg: err });
         } else if (result) {
-            res.json({ success: false, msg: "이미 프로필이 등록 되어 있습니다." });
+            res.status(400).json({ msg: "이미 프로필이 등록 되어 있습니다." });
         } else {
             profile.save((err) => {
                 if (err) {
-                    return res.status(400).json({ success: false, err });
+                    return res.status(400).json({ msg: err });
                 } else {
-                    location.save((err) => {
+                    location.save(async (err) => {
                         if (err) {
-                            return res.status(400).json({ success: false, msg: "위치 저장 실패" })
+                            return res.status(400).json({ msg: err })
                         } else {
-                            tag_data.tag.forEach((item) => {
+                            await tag_data.tag.forEach((item) => {
                                 var tag = new Tag({ user_uid: tag_data.user_uid, tag: item })
                                 tag.save((err) => {
                                     if (err) {
-                                        return res.status(400).json({ success: false, msg: "태그 저장실패" });
+                                        return res.status(400).json({ msg: err });
                                     }
                                 })
                             })
-                            field.save((err, result) => {
-                                if (err) {
-                                    return res.status(400).json({ success: false, msg: "분야 저장 실패" });
-                                } else if (result) {
-                                    req.body.field.forEach((item) => {
-                                        var field_list = new FieldList({
-                                            field_uid: result._id,
-                                            field: item
-                                        })
-                                        field_list.save((err) => {
+                            //분야 등록
+                            await field_data.field.forEach((item) => {
+                                FieldList.findOne({ field: item }, (err, result) => {
+                                    if (err) {
+                                        return res.status(400).json({ msg: err })
+                                    } else if (result) {
+                                        var field = new Field({
+                                            user_uid: req.user._id,
+                                            field: result._id
+                                        });
+                                        field.save((err, result) => {
                                             if (err) {
-                                                return res.status(400).json({ success: false, msg: "분야 명칭 저장 실패" });
+                                                return res.status(400).json({ msg: err })
                                             }
                                         })
-                                    })
-                                    res.json({ success: true, msg: "프로필 등록 완료" })
-                                }
+                                    } else {
+                                        res.json({ msg: "DB상에 존재하지 않는 분야" })
+                                    }
+                                })
                             })
-
+                            res.status(201).json()
                         }
                     })
                 }
@@ -96,8 +107,8 @@ router.get('/:nickname', auth, (req, res) => {
     var user_data = {};
     Profile.findOne({ nickname: req.params.nickname }, (err, profile) => {
         if (err) {
-            res.status(400).json({ success: false, err });
-        } else {
+            res.status(400).json({ msg: err });
+        } else if (profile) {
             user_data = {
                 profile: {
                     "nickname": profile.nickname,
@@ -111,35 +122,32 @@ router.get('/:nickname', auth, (req, res) => {
             };
             Location.findOne({ user_uid: profile.user_uid }, (err, location) => {
                 if (err) {
-                    res.status(400).json({ success: false, err });
+                    res.status(400).json({ msg: err });
                 } else {
                     user_data = { ...user_data, location: { "lat": location.lat, "lon": location.lon } };
                     Tag.find({ user_uid: profile.user_uid }, (err, tag_data) => {
                         if (err) {
-                            res.status(400).json({ success: false, err });
+                            res.status(400).json({ msg: err });
                         } else {
                             var tag = new Array();
                             tag_data.forEach((item) => {
                                 tag.push(item.tag);
                             })
                             user_data = { ...user_data, tag };
-                            Field.findOne({ user_uid: profile.user_uid }, (err, field) => {
+                            Field.find({ user_uid: profile.user_uid }, async (err, result) => {
+                                // console.log(result);
+                                var field_data = new Array();
                                 if (err) {
-                                    res.status(400).json({ success: false, err });
-                                } else {
-                                    FieldList.find({ field_uid: field._id }, (err, field_data) => {
-                                        if (err) {
-                                            res.status(400).json({ success: false, err });
-                                        } else {
-                                            var field = new Array();
-                                            field_data.forEach((item) => {
-                                                field.push(item.field);
-                                            })
-                                            user_data = { ...user_data, field }
-                                            res.json(user_data);
-                                        }
-                                    })
+                                    return res.status(400).json({ msg: err })
+                                } else if (result) {
+                                    for (const item of result) {
+                                        await FieldList.findOne({ _id: item.field }).then((result) => {
+                                            field_data.push(result.field)
+                                        })
+                                    }
                                 }
+                                user_data = { ...user_data, field_data }
+                                res.status(200).json(user_data);
                             })
                         }
                     })
@@ -149,73 +157,71 @@ router.get('/:nickname', auth, (req, res) => {
     })
 })
 //프로필 수정
-router.post('/:nickname', auth, (req, res) => {
+router.put('/:nickname', auth, (req, res) => {
     var user = req.user;
     Profile.findOne({ nickname: req.params.nickname }, (err, profile) => {
         if (err) {
-            res.status(400).json({ success: false, err });
-        } else if (user._id.eqauls(profile.user_uid)) {
+            res.status(400).json({ msg: err });
+        } else if (user._id.equals(profile.user_uid)) {
             const { profile_data, location_data, field_data, tag_data } = getData(req);
             Profile.findOneAndReplace({ nickname: req.params.nickname }, profile_data, { returnDocument: true }, (err, result) => {
                 if (err) {
-                    res.status(400).json({ success: false, err });
+                    res.status(400).json({ msg: err });
                 } else if (result) {
                     Location.findOneAndReplace({ user_uid: location_data.user_uid }, location_data, { returnDocument: true }, (err, result) => {
                         if (err) {
-                            res.status(400).json({ succcess: false, err });
+                            res.status(400).json({ msg: err });
                         } else if (result) {
-                            Tag.deleteMany({ user_uid: tag_data.user_uid }, (err, result) => {
+                            Tag.deleteMany({ user_uid: tag_data.user_uid }, async (err, result) => {
                                 if (err) {
-                                    res.status(400).json({ success: false, err });
+                                    res.status(400).json({ msg: err });
                                 } else {
                                     if (tag_data.tag) {
                                         tag_data.tag.forEach((item) => {
                                             var tag = new Tag({ user_uid: req.user._id, tag: item })
                                             tag.save((err) => {
                                                 if (err) {
-                                                    return res.status(400).json({ success: false, msg: "태그 저장실패" });
+                                                    return res.status(400).json({ msg: err });
                                                 }
                                             })
                                         })
                                     }
-                                    Field.findOne({ user_uid: field_data.user_uid }, (err, result) => {
-                                        if (err) {
-                                            res.status(400).json({ success: false, err });
-                                        } else if (result) {
-                                            FieldList.deleteMany({ field_uid: result._id }, (err, doc) => {
-                                                if (err) {
-                                                    res.status(400).json({ success: false, err });
-                                                } else {
-                                                    if (req.body.field) {
-                                                        req.body.field.forEach((item) => {
-                                                            var field_list = new FieldList({
-                                                                field_uid: result._id,
-                                                                field: item
-                                                            })
-                                                            field_list.save((err) => {
-                                                                if (err) {
-                                                                    return res.status(400).json({ success: false, msg: "분야 명칭 저장 실패" });
-                                                                }
-                                                            })
+                                    await Field.deleteMany({ user_uid: field_data.user_uid }).then(result => {
+                                        if (field_data.field) {
+                                            field_data.field.forEach((item) => {
+                                                FieldList.findOne({ field: item }, (err, result) => {
+                                                    if (err) {
+                                                        return res.status(400).json({ msg: err })
+                                                    } else if (result) {
+                                                        var field = new Field({
+                                                            user_uid: req.user._id,
+                                                            field: result._id
+                                                        });
+                                                        field.save((err, result) => {
+                                                            if (err) {
+                                                                return res.status(400).json({ msg: err })
+                                                            }
                                                         })
+                                                    } else {
+                                                        res.json({ msg: "DB상에 존재하지 않는 분야" })
                                                     }
-                                                    res.json({ success: true, msg: "프로필 수정 완료" })
-                                                }
+                                                })
                                             })
                                         }
                                     })
+                                    res.status(200).json()
                                 }
                             })
                         } else {
-                            res.status(400).json({ success: false, msg: "location 수정 실패" });
+                            res.status(400).json({ msg: err });
                         }
                     })
                 } else {
-                    res.status(400).json({ success: false, msg: "프로필이 존재하지않음" });
+                    res.status(400).json({ msg: err });
                 }
             })
         } else {
-            res.json({ success: false, msg: "본인 프로필만 수정가능" });
+            res.json({ msg: "본인 프로필만 수정가능" });
         }
     })
 
