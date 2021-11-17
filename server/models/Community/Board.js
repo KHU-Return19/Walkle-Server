@@ -2,6 +2,8 @@ const mongoose = require("mongoose");
 
 const autoIncrement = require("mongoose-auto-increment");
 autoIncrement.initialize(mongoose.connection);
+const { Comment } = require("../../models/Community/Comment");
+const { Heart } = require("../../models/Community/Heart");
 
 const boardSchema = mongoose.Schema({
   id: {
@@ -28,10 +30,6 @@ const boardSchema = mongoose.Schema({
     type: Date,
     default: Date.now,
   },
-  updateAt: {
-    type: Date,
-    default: Date.now,
-  },
 });
 
 boardSchema.plugin(autoIncrement.plugin, {
@@ -41,13 +39,6 @@ boardSchema.plugin(autoIncrement.plugin, {
   increment: 1,
 });
 
-boardSchema.methods.updateHeart = function (cb) {
-  var board = this;
-  board.heart++;
-  board.save();
-  return cb();
-};
-
 boardSchema.methods.updateView = function (cb) {
   var board = this;
   board.view++;
@@ -55,5 +46,26 @@ boardSchema.methods.updateView = function (cb) {
   return cb();
 };
 
+boardSchema.methods.getNumberOfComments = async function () {
+  var data;
+  await Comment.find({ boardId: this.id }).then((comments) => {
+    data = comments.length;
+  });
+  return data;
+};
+
+boardSchema.methods.getNumberOfHearts = async function () {
+  var data;
+  await Heart.find({ boardId: this.id, state: true }).then((hearts) => {
+    data = hearts.length;
+  });
+  return data;
+};
+
+boardSchema.methods.getComments = async function () {
+  Comment.find({ boardId: this.id }, (err, comments) => {
+    return comments;
+  });
+};
 const Board = mongoose.model("Board", boardSchema);
 module.exports = { Board };

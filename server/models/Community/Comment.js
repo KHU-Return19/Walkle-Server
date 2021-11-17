@@ -26,10 +26,6 @@ const commentSchema = mongoose.Schema({
     type: Date,
     default: Date.now,
   },
-  updateAt: {
-    type: Date,
-    default: Date.now,
-  },
 });
 commentSchema.plugin(autoIncrement.plugin, {
   model: "comment",
@@ -37,6 +33,10 @@ commentSchema.plugin(autoIncrement.plugin, {
   startAt: 1,
   increment: 1,
 });
+
+commentSchema.statics.deleteByBoardId = function (boardId) {
+  Comment.deleteMany({ boardId: boardId }, (err, deleted) => {});
+};
 
 const Comment = mongoose.model("Comment", commentSchema);
 module.exports = { Comment };

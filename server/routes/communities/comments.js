@@ -48,23 +48,6 @@ router.post("/", auth, (req, res) => {
   });
 });
 
-router.put("/:id", auth, commentPermission, (req, res) => {
-  let comment = req.comment;
-  comment.update(
-    {
-      content: req.body.content,
-      updateAt: Date.now(),
-    },
-    (err, updated) => {
-      if (err) {
-        return res.status(400).json({ msg: err });
-      } else {
-        return res.json({ commentId: comment.id });
-      }
-    }
-  );
-});
-
 router.delete("/:id", auth, commentPermission, (req, res) => {
   let comment = req.comment;
   comment.delete((err, board) => {

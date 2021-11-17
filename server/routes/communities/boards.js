@@ -3,18 +3,27 @@ const router = express.Router();
 
 const { Board } = require("../../models/Community/Board");
 const { Heart } = require("../../models/Community/Heart");
+const { Comment } = require("../../models/Community/Comment");
 
 const { auth } = require("../../middleware/auth");
 const { boardPermission } = require("../../middleware/communityPermission");
 
 router.get("/", auth, (req, res) => {
-  // find all
-  Board.find((err, boards) => {
-    if (err) {
-      return res.status(400).json({ msg: err });
-    } else {
-      return res.json({ boards: boards });
+  // List
+  Board.find().then(async (boards) => {
+    var response = [];
+    for (const board of boards) {
+      response.push({
+        id: board.id,
+        title: board.title,
+        userId: board.userId,
+        createAt: board.createAt,
+        view: board.view,
+        heart: await board.getNumberOfHearts(),
+        comment: await board.getNumberOfComments(),
+      });
     }
+    return res.json({ boards: response });
   });
 });
 
@@ -37,8 +46,16 @@ router.get("/:id", auth, (req, res) => {
     } else if (!board) {
       return res.json({ board: board });
     } else {
-      board.updateView(() => {
-        return res.json({ board: board });
+      board.updateView(async () => {
+        return res.json({
+          id: board.id,
+          title: board.title,
+          userId: board.userId,
+          createAt: board.createAt,
+          view: board.view,
+          heart: await board.getNumberOfHearts(),
+          comment: await board.getNumberOfComments(),
+        });
       });
     }
   });
@@ -55,13 +72,8 @@ router.post("/", auth, (req, res) => {
     if (err) {
       return res.status(400).json({ msg: err });
     } else {
-      Heart.createHeart(userId, saved.id, (err, heart) => {
-        if (err) {
-          return res.status(400).json({ msg: err });
-        } else {
-          return res.status(201).json({ boardId: saved.id });
-        }
-      });
+      Heart.createHeart(userId, saved.id, (err, heart) => {});
+      return res.status(201).json({ boardId: saved.id });
     }
   });
 });
@@ -73,7 +85,6 @@ router.put("/:id", auth, boardPermission, (req, res) => {
     {
       title: req.body.title,
       content: req.body.content,
-      updateAt: Date.now(),
     },
     (err, updated) => {
       if (err) {
@@ -93,6 +104,8 @@ router.delete("/:id", auth, boardPermission, (req, res) => {
     if (err) {
       return res.status(400).json({ msg: err });
     } else {
+      Comment.deleteByBoardId(deleted.id);
+      Heart.deleteByBoardId(deleted.id);
       return res.status(204).json({ boardId: board.id });
     }
   });
