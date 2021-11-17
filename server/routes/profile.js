@@ -8,7 +8,6 @@ const { Location } = require('../models/UserProfile/Location');
 const { Profile } = require('../models/UserProfile/Profile');
 const { Tag } = require('../models/UserProfile/Tag');
 const { auth } = require('../middleware/auth'); //인증
-
 const getData = (req) => {
     const profile_data = {
         user_uid: req.user._id,
@@ -37,6 +36,15 @@ const getData = (req) => {
     return { profile_data, location_data, field_data, tag_data }
 
 }
+// getnickanme,getlocation 테스트코드
+// router.get('/',auth,async (req,res)=>{
+    // var user=req.user;
+    // console.log(await Profile.getnickname(user._id));
+    // console.log(await Location.getlocation(user._id));
+// })
+
+
+
 //프로필 등록
 router.post('/', auth, (req, res) => {
     const { profile_data, location_data, field_data, tag_data } = getData(req);
@@ -151,8 +159,6 @@ router.get('/:nickname', auth, (req, res) => {
 //프로필 수정
 router.put('/:nickname', auth, (req, res) => {
     var user = req.user;
-    const islogin = user._id.equals("1234")
-    console.log(islogin)
     Profile.findOne({ nickname: req.params.nickname }, (err, profile) => {
         if (err) {
             res.status(400).json({ msg: err });
