@@ -38,9 +38,9 @@ const getData = (req) => {
 }
 // getnickanme,getlocation 테스트코드
 // router.get('/',auth,async (req,res)=>{
-    // var user=req.user;
-    // console.log(await Profile.getnickname(user._id));
-    // console.log(await Location.getlocation(user._id));
+//     var user=req.user;
+//     console.log(await Profile.getnickname(user._id));
+//     console.log(await Location.getlocation(user._id));
 // })
 
 

@@ -9,11 +9,6 @@ const port = process.env.PORT || 5000;
 
 const bodyParser = require("body-parser");
 const cookieParser = require("cookie-parser");
-
-
-const bodyParser=require('body-parser');
-const cookieParser=require('cookie-parser');
-
 const config=require('./config/key');
 
 const mongoose=require('mongoose');
@@ -49,3 +44,4 @@ app.use('/api/profile',require('./routes/profile'));
 app.use("/swagger", swaggerUi.serve, swaggerUi.setup(swaggerFile));
 app.listen(port,()=>{
     console.log(`Server Listening ${port}`)
+});

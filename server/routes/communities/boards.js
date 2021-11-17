@@ -7,6 +7,7 @@ const { Comment } = require("../../models/Community/Comment");
 
 const { auth } = require("../../middleware/auth");
 const { boardPermission } = require("../../middleware/communityPermission");
+const { Profile } = require("../../models/UserProfile/Profile");
 
 router.get("/", auth, (req, res) => {
   // List
@@ -26,7 +27,6 @@ router.get("/", auth, (req, res) => {
     return res.json({ boards: response });
   });
 });
-
 router.get("/search", auth, (req, res) => {
   // List
   let keyword = req.query.keyword;
@@ -65,6 +65,7 @@ router.get("/users", auth, (req, res) => {
 
 router.get("/:id", auth, (req, res) => {
   // find by board Id
+
   Board.findOne({ id: req.params.id }, (err, board) => {
     if (err) {
       return res.status(400).json({ msg: err });
@@ -80,6 +81,7 @@ router.get("/:id", auth, (req, res) => {
           view: board.view,
           heart: await board.getNumberOfHearts(),
           comment: await board.getNumberOfComments(),
+          nickname:await Profile.getnickname(req.user._id)
         });
       });
     }
