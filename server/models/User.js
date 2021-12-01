@@ -5,10 +5,6 @@ const autoIncrement = require("mongoose-auto-increment");
 autoIncrement.initialize(mongoose.connection);
 
 const userSchema = mongoose.Schema({
-  id: {
-    type: Number,
-    required: true,
-  },
   userId: {
     type: String,
     maxlength: 30,
@@ -44,13 +40,6 @@ userSchema.pre("save", function (next) {
   } else {
     next();
   }
-});
-
-userSchema.plugin(autoIncrement.plugin, {
-  model: "user",
-  field: "id",
-  startAt: 1,
-  increment: 1,
 });
 
 userSchema.methods.checkPassword = function (plainPassword, cb) {

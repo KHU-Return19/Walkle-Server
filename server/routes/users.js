@@ -8,7 +8,7 @@ router.get("/auth", auth, (req, res) => {
   res.json({
     userId: req.user.userId,
     email: req.user.email,
-    id: req.user.id,
+    _id: req.user._id,
     msg: "Authentication Success",
   });
 });
@@ -52,7 +52,7 @@ router.post("/login", (req, res) => {
               return res.json({ msg: err });
             } else {
               res.cookie("auth", user.token).json({
-                id: user.id,
+                _id: user._id,
                 userId: user.userId,
                 msg: "LogIn Success",
               });

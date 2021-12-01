@@ -62,11 +62,15 @@ commentSchema.plugin(autoIncrement.plugin, {
   increment: 1,
 });
 
-// boardSchema.methods.updateView = function (cb) {
-//   var board = this;
-//   board.view++;
-//   board.save();
-//   return cb();
+communitySchema.methods.updateViews = function (cb) {
+  var community = this;
+  community.views++;
+  community.save();
+  return cb();
+};
+
+// communitySchema.methods.getNumberOfComments = function () {
+//   return this.comments.length;
 // };
 
 const Community = mongoose.model("Community", communitySchema);
