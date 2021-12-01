@@ -7,7 +7,6 @@ const auth = (req, res, next) => {
     if (err) throw err;
     if (!user) {
       return res.json({
-        isAuth: false,
         msg: "authentication failed",
       });
     } else {
