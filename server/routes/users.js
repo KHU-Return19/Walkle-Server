@@ -14,7 +14,6 @@ router.get("/auth", auth, (req, res) => {
 });
 
 router.post("/register", (req, res) => {
-  console.log(req.body);
   User.findOne({ userId: req.body.userId }, (err, user) => {
     if (err) {
       return res.json({ msg: err });

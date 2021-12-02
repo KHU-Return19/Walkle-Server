@@ -4,7 +4,7 @@ const router = express.Router();
 const { Community } = require("../models/Community");
 const { auth } = require("../middleware/auth");
 const { postPermission } = require("../middleware/communityPermission");
-
+const { Profile } = require("../models/UserProfile/Profile");
 // read community post
 router.get("/posts/:id", auth, (req, res) => {
   Community.findOne({ id: req.params.id }, (err, community) => {
@@ -14,7 +14,6 @@ router.get("/posts/:id", auth, (req, res) => {
       return res.status(400).json({ msg: "Community Not Found" });
     } else {
       community.updateViews(() => {
-        console.log(community.getNumberOfComments());
         return res.status(200).json({ community: community });
       });
     }
@@ -23,20 +22,20 @@ router.get("/posts/:id", auth, (req, res) => {
 
 // read community post list
 router.get("/posts", auth, (req, res) => {
-  Community.find((err, communities) => {
+  Community.find(async (err, communities) => {
     if (err) {
       return res.status(400).json({ msg: err });
     } else {
       var response = [];
 
       for (const community of communities) {
-        // console.log(Profile.getnickname(community.userId));
         response.push({
           id: community.id,
           userId: community.userId,
           title: community.title,
           createAt: community.createAt,
           comments: community.comments.length,
+          nickname: await Profile.getnickname(community.userId),
         });
       }
       return res.status(200).json({ communities: response });
@@ -61,23 +60,13 @@ router.post("/posts", auth, (req, res) => {
 });
 
 // modify community post
-router.put("/posts/:id", auth, postPermission, (req, res) => {
-  let community = req.community;
-  community.update(
-    {
-      title: req.body.title,
-      content: req.body.content,
-    },
-    (err, updated) => {
-      if (err) {
-        return res.status(400).json({ msg: err });
-      } else {
-        return res.status(200).json({
-          communityId: updated.id,
-        });
-      }
-    }
-  );
+router.put("/posts/:id", auth, postPermission, async (req, res) => {
+  let update = {
+    title: req.body.title,
+    content: req.body.content,
+  };
+  await Community.updateOne({ id: req.community.id }, update);
+  return res.status(200).json({ community: req.community.id });
 });
 
 // delete community posts

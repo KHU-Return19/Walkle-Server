@@ -4,18 +4,12 @@ const autoIncrement = require("mongoose-auto-increment");
 autoIncrement.initialize(mongoose.connection);
 
 const commentSchema = mongoose.Schema({
-  id: {
-    type: Number,
-    required: true,
-  },
   userId: {
     type: mongoose.Schema.Types.ObjectId,
     ref: "User",
-    required: true,
   },
   content: {
     type: String,
-    required: true,
   },
   createdAt: {
     type: Date,
@@ -32,6 +26,10 @@ const communitySchema = mongoose.Schema({
   title: {
     type: String,
     required: true,
+  },
+  id: {
+    type: Number,
+    default: 1,
   },
   content: {
     type: String,
@@ -50,13 +48,6 @@ const communitySchema = mongoose.Schema({
 
 communitySchema.plugin(autoIncrement.plugin, {
   model: "community",
-  field: "id",
-  startAt: 1,
-  increment: 1,
-});
-
-commentSchema.plugin(autoIncrement.plugin, {
-  model: "comment",
   field: "id",
   startAt: 1,
   increment: 1,
