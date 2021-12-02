@@ -6,6 +6,11 @@ const cors=require("cors");
 
 require("dotenv").config();
 const port = process.env.PORT || 5000;
+const http=require('http').createServer(app);
+const io=require('socket.io')(http);
+require('./socket')(io)
+
+
 
 const bodyParser = require("body-parser");
 const cookieParser = require("cookie-parser");
