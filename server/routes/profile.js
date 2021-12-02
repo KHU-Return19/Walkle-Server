@@ -224,7 +224,7 @@ router.put('/:nickname', auth, (req, res) => {
                                                         // console.log("없음");
                                                         // message="존재하지 않는 분야";
                                                         // return "not exist";
-                                                        throw new Error("not exist");
+                                                        throw new Error("not exist")
                                                     }
                                                 })
                                                 // if(result=="error" || result=="not exist"){
@@ -232,7 +232,7 @@ router.put('/:nickname', auth, (req, res) => {
                                                 // }
                                             }
                                         }
-                                    }).catch((err)=>{return res.status(400).json({msg:"fck you"})})
+                                    }).catch((err)=>{console.log(err.message);return res.status(400).json({msg:err.message})})
                                     res.status(200).json()
                                 }
                             })
