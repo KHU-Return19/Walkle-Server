@@ -3,8 +3,12 @@ const router = express.Router();
 
 const { Community } = require("../models/Community");
 const { auth } = require("../middleware/auth");
-const { postPermission } = require("../middleware/communityPermission");
+const {
+  postPermission,
+  commentPermission,
+} = require("../middleware/communityPermission");
 const { Profile } = require("../models/UserProfile/Profile");
+
 // read community post
 router.get("/posts/:id", auth, (req, res) => {
   Community.findOne({ id: req.params.id }, (err, community) => {
@@ -13,8 +17,17 @@ router.get("/posts/:id", auth, (req, res) => {
     } else if (!community) {
       return res.status(400).json({ msg: "Community Not Found" });
     } else {
-      community.updateViews(() => {
-        return res.status(200).json({ community: community });
+      community.updateViews(async () => {
+        const response = {
+          id: community.id,
+          userId: community.userId,
+          nickname: await Profile.getnickname(community.userId),
+          title: community.title,
+          createAt: community.createAt,
+          views: community.views,
+          comments: community.comments,
+        };
+        return res.status(200).json({ community: response });
       });
     }
   });
@@ -34,6 +47,7 @@ router.get("/posts", auth, (req, res) => {
           userId: community.userId,
           title: community.title,
           createAt: community.createAt,
+          views: community.views,
           comments: community.comments.length,
           nickname: await Profile.getnickname(community.userId),
         });
@@ -42,6 +56,7 @@ router.get("/posts", auth, (req, res) => {
     }
   });
 });
+
 // write community post
 router.post("/posts", auth, (req, res) => {
   let newCommunity = new Community({
@@ -101,9 +116,29 @@ router.post("/comments", auth, (req, res) => {
         if (err) {
           return res.status(400).json({ msg: err });
         }
-        return res.status(201).json({ commentId: community.comments });
+        return res.status(201).json({ commentId: community.comments._id });
       });
     }
+  });
+});
+
+// Read community comment
+router.get("/comments/:_id", auth, (req, res) => {
+  const comment = req.comment;
+  return res.status(201).json({ comment: comment });
+});
+
+// Update community comment
+router.put("/comments/:_id", auth, commentPermission, (req, res) => {
+  const community = req.community;
+  const comment = req.comment;
+  comment.content = req.body.content;
+  console.log(req.body.content);
+  community.save((err, saved) => {
+    if (err) {
+      return res.status(400).json({ msg: err });
+    }
+    return res.status(201).json({ commentId: comment._id });
   });
 });
 

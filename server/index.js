@@ -37,6 +37,7 @@ app.use("/api/users", require("./routes/users"));
 app.use("/api/profile", require("./routes/profile"));
 
 app.use("/swagger", swaggerUi.serve, swaggerUi.setup(swaggerFile));
+
 app.listen(port, () => {
   console.log(`Server Listening ${port}`);
 });

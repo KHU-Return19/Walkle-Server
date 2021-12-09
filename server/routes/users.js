@@ -9,7 +9,6 @@ router.get("/auth", auth, (req, res) => {
     userId: req.user.userId,
     email: req.user.email,
     _id: req.user._id,
-    msg: "Authentication Success",
   });
 });
 
@@ -26,7 +25,7 @@ router.post("/register", (req, res) => {
           return res.json({ msg: err });
         } else {
           return res.json({
-            msg: "SignUp Success",
+            _id: doc._id,
           });
         }
       });
@@ -53,7 +52,6 @@ router.post("/login", (req, res) => {
               res.cookie("auth", user.token).json({
                 _id: user._id,
                 userId: user.userId,
-                msg: "LogIn Success",
               });
             }
           });

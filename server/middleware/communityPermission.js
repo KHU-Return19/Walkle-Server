@@ -1,8 +1,9 @@
+const e = require("express");
 const { Community } = require("../models/Community");
 
 const postPermission = (req, res, next) => {
-  let userId = req.user._id;
-  var communityId = req.params.id;
+  const userId = req.user._id;
+  const communityId = req.params.id;
 
   Community.findOne({ id: communityId }, (err, community) => {
     if (err) throw err;
@@ -17,21 +18,22 @@ const postPermission = (req, res, next) => {
   });
 };
 
-// const commentPermission = (req, res, next) => {
-//   let userId = req.user.id;
-//   var commentId = req.params.id;
+const commentPermission = (req, res, next) => {
+  const userId = req.user._id;
+  const commentId = req.params._id;
+  Community.findOne({ id: 1 }, (err, community) => {
+    if (err) throw err;
+    const comment = community.comments.id(commentId);
+    if (!comment) {
+      return res.status(400).json({ msg: "Comment Not Found" });
+    } else if (!userId.equals(comment.userId)) {
+      return res.status(403).json({ msg: "Forbidden" });
+    } else {
+      req.community = community;
+      req.comment = comment;
+      next();
+    }
+  });
+};
 
-//   Comment.findOne({ commentId: commentId }, (err, comment) => {
-//     if (err) throw err;
-//     if (!comment) {
-//       return res.status(400).json({ msg: "Board Not Found" });
-//     } else if (userId != comment.userId) {
-//       return res.status(403).json({ msg: "Forbidden" });
-//     } else {
-//       req.comment = comment;
-//       next();
-//     }
-//   });
-// };
-
-module.exports = { postPermission };
+module.exports = { postPermission, commentPermission };
