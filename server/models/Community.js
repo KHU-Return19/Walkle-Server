@@ -17,6 +17,13 @@ const commentSchema = mongoose.Schema({
   },
 });
 
+const heartSchema = mongoose.Schema({
+  userId: {
+    type: mongoose.Schema.Types.ObjectId,
+    ref: "User",
+  },
+});
+
 const communitySchema = mongoose.Schema({
   userId: {
     type: mongoose.Schema.Types.ObjectId,
@@ -44,6 +51,7 @@ const communitySchema = mongoose.Schema({
     default: Date.now,
   },
   comments: [commentSchema],
+  hearts: [heartSchema],
 });
 
 communitySchema.plugin(autoIncrement.plugin, {
@@ -59,10 +67,6 @@ communitySchema.methods.updateViews = function (cb) {
   community.save();
   return cb();
 };
-
-// communitySchema.methods.getNumberOfComments = function () {
-//   return this.comments.length;
-// };
 
 const Community = mongoose.model("Community", communitySchema);
 module.exports = { Community };

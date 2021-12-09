@@ -8,6 +8,7 @@ const {
   commentPermission,
 } = require("../middleware/communityPermission");
 const { Profile } = require("../models/UserProfile/Profile");
+const e = require("express");
 
 // read community post
 router.get("/:id", auth, (req, res) => {
@@ -18,6 +19,15 @@ router.get("/:id", auth, (req, res) => {
       return res.status(400).json({ msg: "Community Not Found" });
     } else {
       community.updateViews(async () => {
+        const commentResponse = [];
+        for (const comment of community.comments) {
+          commentResponse.push({
+            _id: comment.id,
+            content: comment.content,
+            userId: comment.userId,
+            nickname: await Profile.getnickname(comment.userId),
+          });
+        }
         const response = {
           id: community.id,
           userId: community.userId,
@@ -26,7 +36,8 @@ router.get("/:id", auth, (req, res) => {
           content: community.content,
           createAt: community.createAt,
           views: community.views,
-          comments: community.comments,
+          comments: commentResponse,
+          hearts: community.hearts.length,
         };
         return res.status(200).json({ community: response });
       });
@@ -40,7 +51,7 @@ router.get("/", auth, (req, res) => {
     if (err) {
       return res.status(400).json({ msg: err });
     } else {
-      var response = [];
+      const response = [];
 
       for (const community of communities) {
         response.push({
@@ -50,6 +61,7 @@ router.get("/", auth, (req, res) => {
           createAt: community.createAt,
           views: community.views,
           comments: community.comments.length,
+          hearts: community.hearts.length,
           nickname: await Profile.getnickname(community.userId),
         });
       }
@@ -111,7 +123,6 @@ router.post("/:id/comment", auth, (req, res) => {
     } else {
       // add comments
       const numOfComment = community.comments.push(newComment);
-      console.log(numOfComment);
       // save community
       community.save((err, saved) => {
         if (err) {
@@ -126,17 +137,29 @@ router.post("/:id/comment", auth, (req, res) => {
 });
 
 // Read community comment
-router.get("/:id/comment/:commentId", auth, commentPermission, (req, res) => {
-  const comment = req.comment;
-  return res.status(201).json({ comment: comment });
-});
+router.get(
+  "/:id/comment/:commentId",
+  auth,
+  commentPermission,
+  async (req, res) => {
+    const comment = req.comment;
+    const commentResponse = [];
+    commentResponse.push({
+      _id: comment.id,
+      content: comment.content,
+      userId: comment.userId,
+      nickname: await Profile.getnickname(comment.userId),
+    });
+
+    return res.status(201).json({ comment: commentResponse });
+  }
+);
 
 // Update community comment
 router.put("/:id/comment/:commentId", auth, commentPermission, (req, res) => {
   const community = req.community;
   const comment = req.comment;
   comment.content = req.body.content;
-  console.log(req.body.content);
   community.save((err, saved) => {
     if (err) {
       return res.status(400).json({ msg: err });
@@ -162,5 +185,46 @@ router.delete(
     });
   }
 );
+
+// write community comment
+router.post("/:id/heart", auth, (req, res) => {
+  const userId = req.user._id;
+  let newHeart = {
+    userId: userId,
+  };
+
+  Community.findOne({ id: req.params.id }, (err, community) => {
+    if (err) {
+      return res.status(400).json({ msg: err });
+    } else if (!community) {
+      return res.status(400).json({ msg: "Community Not Found" });
+    } else {
+      const hearts = community.hearts;
+      const heart = hearts.filter((e) => userId.equals(e.userId));
+      console.log(heart);
+
+      if (heart.length === 0) {
+        // add heart
+        const numOfHeart = community.hearts.push(newHeart);
+        // save community
+        community.save((err, saved) => {
+          if (err) {
+            return res.status(400).json({ msg: err });
+          }
+          return res.status(201).json({ hearts: numOfHeart });
+        });
+      } else {
+        const removed = community.hearts.id(heart[0]._id);
+        removed.remove();
+        community.save((err, saved) => {
+          if (err) {
+            return res.status(400).json({ msg: err });
+          }
+          return res.status(204).json(null);
+        });
+      }
+    }
+  });
+});
 
 module.exports = router;
