@@ -10,7 +10,7 @@ const {
 const { Profile } = require("../models/UserProfile/Profile");
 
 // read community post
-router.get("/posts/:id", auth, (req, res) => {
+router.get("/:id", auth, (req, res) => {
   Community.findOne({ id: req.params.id }, (err, community) => {
     if (err) {
       return res.status(400).json({ msg: err });
@@ -23,6 +23,7 @@ router.get("/posts/:id", auth, (req, res) => {
           userId: community.userId,
           nickname: await Profile.getnickname(community.userId),
           title: community.title,
+          content: community.content,
           createAt: community.createAt,
           views: community.views,
           comments: community.comments,
@@ -34,7 +35,7 @@ router.get("/posts/:id", auth, (req, res) => {
 });
 
 // read community post list
-router.get("/posts", auth, (req, res) => {
+router.get("/", auth, (req, res) => {
   Community.find(async (err, communities) => {
     if (err) {
       return res.status(400).json({ msg: err });
@@ -58,7 +59,7 @@ router.get("/posts", auth, (req, res) => {
 });
 
 // write community post
-router.post("/posts", auth, (req, res) => {
+router.post("/", auth, (req, res) => {
   let newCommunity = new Community({
     userId: req.user._id,
     title: req.body.title,
@@ -75,7 +76,7 @@ router.post("/posts", auth, (req, res) => {
 });
 
 // modify community post
-router.put("/posts/:id", auth, postPermission, async (req, res) => {
+router.put("/:id", auth, postPermission, async (req, res) => {
   let update = {
     title: req.body.title,
     content: req.body.content,
@@ -85,7 +86,7 @@ router.put("/posts/:id", auth, postPermission, async (req, res) => {
 });
 
 // delete community posts
-router.delete("/posts/:id", auth, postPermission, (req, res) => {
+router.delete("/:id", auth, postPermission, (req, res) => {
   let community = req.community;
   community.delete((err, deleted) => {
     if (err) {
@@ -97,39 +98,41 @@ router.delete("/posts/:id", auth, postPermission, (req, res) => {
 });
 
 // write community comment
-router.post("/comments", auth, (req, res) => {
+router.post("/:id/comment", auth, (req, res) => {
   let newComment = {
     userId: req.user._id,
     content: req.body.content,
   };
-  Community.findOne({ id: req.query.communityId }, (err, community) => {
+  Community.findOne({ id: req.params.id }, (err, community) => {
     if (err) {
       return res.status(400).json({ msg: err });
     } else if (!community) {
       return res.status(400).json({ msg: "Community Not Found" });
     } else {
       // add comments
-      community.comments.push(newComment);
-
+      const numOfComment = community.comments.push(newComment);
+      console.log(numOfComment);
       // save community
       community.save((err, saved) => {
         if (err) {
           return res.status(400).json({ msg: err });
         }
-        return res.status(201).json({ commentId: community.comments._id });
+        return res
+          .status(201)
+          .json({ commentId: community.comments[numOfComment - 1]._id });
       });
     }
   });
 });
 
 // Read community comment
-router.get("/comments/:_id", auth, (req, res) => {
+router.get("/:id/comment/:commentId", auth, commentPermission, (req, res) => {
   const comment = req.comment;
   return res.status(201).json({ comment: comment });
 });
 
 // Update community comment
-router.put("/comments/:_id", auth, commentPermission, (req, res) => {
+router.put("/:id/comment/:commentId", auth, commentPermission, (req, res) => {
   const community = req.community;
   const comment = req.comment;
   comment.content = req.body.content;
@@ -141,5 +144,23 @@ router.put("/comments/:_id", auth, commentPermission, (req, res) => {
     return res.status(201).json({ commentId: comment._id });
   });
 });
+
+// Delete community comment
+router.delete(
+  "/:id/comment/:commentId",
+  auth,
+  commentPermission,
+  (req, res) => {
+    const community = req.community;
+    const comment = req.comment;
+    comment.remove();
+    community.save((err, saved) => {
+      if (err) {
+        return res.status(400).json({ msg: err });
+      }
+      return res.status(204).json(null);
+    });
+  }
+);
 
 module.exports = router;

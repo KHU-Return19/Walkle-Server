@@ -20,8 +20,9 @@ const postPermission = (req, res, next) => {
 
 const commentPermission = (req, res, next) => {
   const userId = req.user._id;
-  const commentId = req.params._id;
-  Community.findOne({ id: 1 }, (err, community) => {
+  const commentId = req.params.commentId;
+  const postId = req.params.id;
+  Community.findOne({ id: postId }, (err, community) => {
     if (err) throw err;
     const comment = community.comments.id(commentId);
     if (!comment) {
