@@ -8,9 +8,8 @@ const {
   commentPermission,
 } = require("../middleware/communityPermission");
 const { Profile } = require("../models/UserProfile/Profile");
-const e = require("express");
 
-// read community post
+// Read community post
 router.get("/:id", auth, (req, res) => {
   Community.findOne({ id: req.params.id }, (err, community) => {
     if (err) {
@@ -45,32 +44,58 @@ router.get("/:id", auth, (req, res) => {
   });
 });
 
-// read community post list
+// Read community post list
 router.get("/", auth, (req, res) => {
-  Community.find(async (err, communities) => {
-    if (err) {
-      return res.status(400).json({ msg: err });
-    } else {
-      const response = [];
+  const userId = req.query.userId;
+  if (!userId) {
+    // Read All
+    Community.find(async (err, communities) => {
+      if (err) {
+        return res.status(400).json({ msg: err });
+      } else {
+        const response = [];
 
-      for (const community of communities) {
-        response.push({
-          id: community.id,
-          userId: community.userId,
-          title: community.title,
-          createAt: community.createAt,
-          views: community.views,
-          comments: community.comments.length,
-          hearts: community.hearts.length,
-          nickname: await Profile.getnickname(community.userId),
-        });
+        for (const community of communities) {
+          response.push({
+            id: community.id,
+            userId: community.userId,
+            title: community.title,
+            createAt: community.createAt,
+            views: community.views,
+            comments: community.comments.length,
+            hearts: community.hearts.length,
+            nickname: await Profile.getnickname(community.userId),
+          });
+        }
+        return res.status(200).json({ communities: response });
       }
-      return res.status(200).json({ communities: response });
-    }
-  });
+    });
+  } else {
+    Community.find({ userId: userId }, async (err, communities) => {
+      if (err) {
+        return res.status(400).json({ msg: err });
+      } else {
+        const response = [];
+
+        for (const community of communities) {
+          response.push({
+            id: community.id,
+            userId: community.userId,
+            title: community.title,
+            createAt: community.createAt,
+            views: community.views,
+            comments: community.comments.length,
+            hearts: community.hearts.length,
+            nickname: await Profile.getnickname(community.userId),
+          });
+        }
+        return res.status(200).json({ communities: response });
+      }
+    });
+  }
 });
 
-// write community post
+// Write community post
 router.post("/", auth, (req, res) => {
   let newCommunity = new Community({
     userId: req.user._id,
@@ -87,7 +112,7 @@ router.post("/", auth, (req, res) => {
   });
 });
 
-// modify community post
+// Modify community post
 router.put("/:id", auth, postPermission, async (req, res) => {
   let update = {
     title: req.body.title,
@@ -97,7 +122,7 @@ router.put("/:id", auth, postPermission, async (req, res) => {
   return res.status(200).json({ community: req.community.id });
 });
 
-// delete community posts
+// Delete community posts
 router.delete("/:id", auth, postPermission, (req, res) => {
   let community = req.community;
   community.delete((err, deleted) => {
@@ -109,7 +134,7 @@ router.delete("/:id", auth, postPermission, (req, res) => {
   });
 });
 
-// write community comment
+// Write community comment
 router.post("/:id/comment", auth, (req, res) => {
   let newComment = {
     userId: req.user._id,
@@ -186,7 +211,7 @@ router.delete(
   }
 );
 
-// write community comment
+// Write community comment
 router.post("/:id/heart", auth, (req, res) => {
   const userId = req.user._id;
   let newHeart = {
