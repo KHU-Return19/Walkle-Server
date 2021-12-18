@@ -218,6 +218,7 @@ router.post("/:id/heart", auth, (req, res) => {
     userId: userId,
   };
 
+  // Update heart
   Community.findOne({ id: req.params.id }, (err, community) => {
     if (err) {
       return res.status(400).json({ msg: err });

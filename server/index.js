@@ -30,11 +30,13 @@ app.use(bodyParser.urlencoded({ extended: true }));
 app.use(bodyParser.json());
 app.use(cookieParser());
 
-app.use("/api/community/", require("./routes/communities"));
+app.use("/api/community/", require("./routes/community"));
 
 app.use("/api/users", require("./routes/users"));
 
 app.use("/api/profile", require("./routes/profile"));
+
+app.use("/api/projects", require("./routes/projects"));
 
 app.use("/swagger", swaggerUi.serve, swaggerUi.setup(swaggerFile));
 

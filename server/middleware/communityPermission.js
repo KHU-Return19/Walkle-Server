@@ -1,4 +1,3 @@
-const e = require("express");
 const { Community } = require("../models/Community");
 
 const postPermission = (req, res, next) => {
