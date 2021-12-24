@@ -1,6 +1,6 @@
 const express = require('express');
 const router = express.Router();
-
+const multer = require('multer');
 
 const { Field } = require('../models/UserProfile/Field');
 const { FieldList } = require('../models/UserProfile/FieldList');
@@ -8,6 +8,43 @@ const { Location } = require('../models/UserProfile/Location');
 const { Profile } = require('../models/UserProfile/Profile');
 const { Tag } = require('../models/UserProfile/Tag');
 const { auth } = require('../middleware/auth'); //인증
+var fs=require('fs');
+
+var storage = multer.diskStorage({
+    destination: function (req, file, cb) {
+        cb(null, 'uploads/')
+    },
+    filename: function (req, file, cb) {
+        cb(null, `${Date.now()}_${file.originalname}`)
+    }
+})
+
+var upload = multer({ storage: storage })
+
+router.post('/image', upload.single("file"), (req, res) => {
+    const { fieldname, originalname, encoding, mimetype, destination, filename, path, size } = req.file
+    const { name } = req.body;
+    console.log("body 데이터 : ", name);
+    console.log("폼에 정의된 필드명 : ", fieldname);
+    console.log("사용자가 업로드한 파일 명 : ", originalname);
+    console.log("파일의 엔코딩 타입 : ", encoding);
+    console.log("파일의 Mime 타입 : ", mimetype);
+    console.log("파일이 저장된 폴더 : ", destination);
+    console.log("destinatin에 저장된 파일 명 : ", filename);
+    console.log("업로드된 파일의 전체 경로 ", path);
+    console.log("파일의 바이트(byte 사이즈)", size);
+    res.json({ ok: true, data: "Single Upload Ok" })
+})
+router.delete('/image/:imageId',(req,res)=>{
+    fs.unlink(`uploads/${req.params.imageId}`,(err)=>{
+        if(err){
+            res.status(400).json({success:false,msg:"failed delete image"});
+        }else{
+            res.status(201).json({success:true});
+        }
+    })
+})
+
 const getData = (req) => {
     const profile_data = {
         user_uid: req.user._id,
@@ -91,22 +128,22 @@ router.post('/', auth, (req, res) => {
                                         });
                                         field.save((err, body) => {
                                             if (err) {
-                                                message=err;
+                                                message = err;
                                                 return "error";
                                             }
                                         })
                                     } else {
                                         console.log("없음");
-                                        message="존재하지 않는 분야";
+                                        message = "존재하지 않는 분야";
                                         return "not exist";
                                     }
                                 })
-                                if(result=="error" || result=="not exist"){
-                                    return res.status(400).json({message});
+                                if (result == "error" || result == "not exist") {
+                                    return res.status(400).json({ message });
                                 }
                             }
-                            return res.status(201).json({success:true});
-                            
+                            return res.status(201).json({ success: true });
+
                         }
                     })
                 }
@@ -216,7 +253,7 @@ router.put('/:nickname', auth, (req, res) => {
                                                         });
                                                         field.save((err, body) => {
                                                             if (err) {
-                                                                message=err;
+                                                                message = err;
                                                                 throw new Error(err);
                                                             }
                                                         })
@@ -232,7 +269,7 @@ router.put('/:nickname', auth, (req, res) => {
                                                 // }
                                             }
                                         }
-                                    }).catch((err)=>{console.log(err.message);return res.status(400).json({msg:err.message})})
+                                    }).catch((err) => { console.log(err.message); return res.status(400).json({ msg: err.message }) })
                                     res.status(200).json()
                                 }
                             })

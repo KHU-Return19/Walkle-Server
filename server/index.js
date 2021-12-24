@@ -8,7 +8,7 @@ require("dotenv").config();
 const port = process.env.PORT || 5000;
 const http=require('http').createServer(app);
 const io=require('socket.io')(http);
-require('./socket')(io)
+require('./socket')(io);
 
 
 
@@ -47,6 +47,17 @@ app.use('/api/users',require('./routes/users'));
 app.use('/api/profile',require('./routes/profile'));
 
 app.use("/swagger", swaggerUi.serve, swaggerUi.setup(swaggerFile));
-app.listen(port,()=>{
-    console.log(`Server Listening ${port}`)
-});
+
+app.set('view engine','ejs');
+app.set('views','./server/views');
+
+
+app.get('/chat',(req,res)=>{
+  res.render('chat');
+})
+// app.listen(port,()=>{
+//     console.log(`Server Listening ${port}`)
+// });
+http.listen(port,()=>{
+  console.log('server start');
+})
