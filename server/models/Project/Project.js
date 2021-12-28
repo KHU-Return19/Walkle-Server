@@ -17,15 +17,24 @@ const projectSchema = mongoose.Schema({
     type: Number,
     default: 1,
   },
-  content: {
+  introduction: {
     type: String,
-    required: true,
+    defulat: "",
+  },
+  description: {
+    type: String,
+    defulat: "",
   },
   status: {
     type: Number,
   },
-  deadline: {
+  recruitStart: {
     type: Date,
+    default: null,
+  },
+  recruitEnd: {
+    type: Date,
+    default: null,
   },
   views: {
     type: Number,

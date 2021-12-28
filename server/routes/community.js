@@ -8,6 +8,7 @@ const {
   commentPermission,
 } = require("../middleware/communityPermission");
 const { Profile } = require("../models/UserProfile/Profile");
+const { Category } = require("../models/Project/Category");
 
 // Read community post
 router.get("/:id", auth, (req, res) => {
@@ -97,7 +98,7 @@ router.get("/", auth, (req, res) => {
 
 // Write community post
 router.post("/", auth, (req, res) => {
-  let newCommunity = new Community({
+  const newCommunity = new Community({
     userId: req.user._id,
     title: req.body.title,
     content: req.body.content,
@@ -112,9 +113,9 @@ router.post("/", auth, (req, res) => {
   });
 });
 
-// Modify community post
+// Update community post
 router.put("/:id", auth, postPermission, async (req, res) => {
-  let update = {
+  const update = {
     title: req.body.title,
     content: req.body.content,
   };
@@ -124,7 +125,7 @@ router.put("/:id", auth, postPermission, async (req, res) => {
 
 // Delete community posts
 router.delete("/:id", auth, postPermission, (req, res) => {
-  let community = req.community;
+  const community = req.community;
   community.delete((err, deleted) => {
     if (err) {
       return res.status(400).json({ msg: err });
@@ -136,7 +137,7 @@ router.delete("/:id", auth, postPermission, (req, res) => {
 
 // Write community comment
 router.post("/:id/comment", auth, (req, res) => {
-  let newComment = {
+  const newComment = {
     userId: req.user._id,
     content: req.body.content,
   };

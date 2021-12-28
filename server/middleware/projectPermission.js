@@ -16,3 +16,5 @@ const postPermission = (req, res, next) => {
     }
   });
 };
+
+module.exports = { postPermission };

@@ -1,9 +1,9 @@
 const mongoose = require("mongoose");
 
 const projectCategorySchema = mongoose.Schema({
-  userId: {
-    type: mongoose.Schema.Types.ObjectId,
-    ref: "User",
+  projectId: {
+    type: Number,
+    ref: "Project",
   },
   categoryId: {
     type: mongoose.Schema.Types.ObjectId,

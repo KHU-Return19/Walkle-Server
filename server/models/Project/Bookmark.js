@@ -1,6 +1,6 @@
 const mongoose = require("mongoose");
 
-const projectUserSchema = mongoose.Schema({
+const bookmarkSchema = mongoose.Schema({
   userId: {
     type: mongoose.Schema.Types.ObjectId,
     ref: "User",
@@ -11,5 +11,5 @@ const projectUserSchema = mongoose.Schema({
   },
 });
 
-const ProjectUser = mongoose.model("ProjectUser", projectUserSchema);
-module.exports = { ProjectUser };
+const Bookmark = mongoose.model("Bookmark", bookmarkSchema);
+module.exports = { Bookmark };
