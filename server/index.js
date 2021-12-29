@@ -39,6 +39,8 @@ app.use("/api/community/", require("./routes/community"));
 
 app.use("/api/users", require("./routes/users"));
 
+app.use('/api/chat',require('./routes/chat'));
+
 app.use("/api/profile", require("./routes/profile"));
 
 app.use("/api/projects", require("./routes/projects"));

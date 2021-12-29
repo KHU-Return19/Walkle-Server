@@ -1,7 +1,7 @@
 const mongoose=require('mongoose');
 
 const chattingroommemberSchema=mongoose.Schema({
-    chattingroomt_uid:{
+    chattingroom_uid:{
         type:mongoose.Schema.Types.ObjectId,
         ref:'ChattingRoom'
     },
