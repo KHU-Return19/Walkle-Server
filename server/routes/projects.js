@@ -213,23 +213,29 @@ router.delete("/bookmark/:id", auth, (req, res) => {
 
 // Read Bookmark
 router.get("/bookmark", auth, (req, res) => {
-  Bookmark.find({ userId: req.user._id }, (err, bookmarks) => {
-    const response = [];
-    for (const bookmark of bookmarks) {
-      Project.findOne({ id: bookmark.projectId }, async (err, project) => {
-        response.push({
-          id: project.id,
-          title: project.title,
-          introduction: project.introduction,
-          status: project.status,
-          views: project.views,
-          createdAt: project.createdAt,
-          nickname: await Profile.getnickname(project.userId),
-        });
-      });
-    }
-    return res.status(200).json({ bookmars: response });
-  });
+  Bookmark.find({ userId: req.user._id })
+    .exec()
+    .then(async (bookmarks) => {
+      const response = [];
+
+      for (const bookmark of bookmarks) {
+        Project.findOne({ id: bookmark.projectId })
+          .exec()
+          .then(async (project) => {
+            console.log("s");
+            response.push({
+              id: project.id,
+              title: project.title,
+              introduction: project.introduction,
+              status: project.status,
+              views: project.views,
+              createdAt: project.createdAt,
+              nickname: await Profile.getnickname(project.userId),
+            });
+          });
+      }
+      return res.status(200).json({ bookmarks: response });
+    });
 });
 
 // Add project category
