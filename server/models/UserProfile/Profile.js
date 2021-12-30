@@ -34,8 +34,15 @@ const profileSchema = mongoose.Schema({
   picture: {
     type: String,
   },
+  lat:{
+    type:Number,
+  },
+  lon:{
+    type:Number
+  },
+  tags:[String],
+  fields:[String],
 });
-
 profileSchema.statics.getnickname = async function (user_uid) {
   var user = this;
   var res;
@@ -52,5 +59,17 @@ profileSchema.statics.getnickname = async function (user_uid) {
     });
   return res;
 };
+profileSchema.statics.getlocation = async function(user_uid){
+  var user=this;
+  var res;
+  await this.findOne({user_uid}).then((result)=>{
+      if(result){
+          res=[result.lat,result.lon];
+      }else{
+          res="";
+      }
+  }).catch(err=>{res=err})
+  return res;
+}
 const Profile = mongoose.model("Profile", profileSchema);
 module.exports = { Profile };
