@@ -1,4 +1,17 @@
 const mongoose = require("mongoose");
+const locationSchema=mongoose.Schema({
+  lat:{
+    type:Number,
+  },
+  lon:{
+    type:Number
+  },
+});
+const tagSchema=mongoose.Schema({
+  tag:{
+    type:String
+  }
+});
 const profileSchema = mongoose.Schema({
   user_uid: {
     type: mongoose.Schema.Types.ObjectId,
@@ -34,14 +47,14 @@ const profileSchema = mongoose.Schema({
   picture: {
     type: String,
   },
-  lat:{
-    type:Number,
-  },
-  lon:{
-    type:Number
-  },
-  tags:[String],
-  fields:[String],
+  location:[locationSchema],
+  tags:[tagSchema],
+  fields:[{
+    field_uid:{
+    type:mongoose.Schema.Types.ObjectId,
+    ref:'Field',
+    }
+  }],
 });
 profileSchema.statics.getnickname = async function (user_uid) {
   var user = this;
@@ -64,7 +77,7 @@ profileSchema.statics.getlocation = async function(user_uid){
   var res;
   await this.findOne({user_uid}).then((result)=>{
       if(result){
-          res=[result.lat,result.lon];
+          res=[result.location];
       }else{
           res="";
       }

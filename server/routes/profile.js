@@ -1,7 +1,7 @@
 const express = require('express');
 const router = express.Router();
 
-const { FieldList } = require('../models/UserProfile/FieldList');
+const { Field } = require('../models/UserProfile/Field');
 const { Profile } = require('../models/UserProfile/Profile');
 const { auth } = require('../middleware/auth'); //인증
 
@@ -16,22 +16,21 @@ const getData = (req) => {
         age: req.body.age,
         gender: req.body.gender,
         picture: req.body.picture,
-        lat:req.body.lat,
-        lon:req.body.lon,
-        tags:req.body.tag,
+        location:[],
+        tags:[],
         fields:[]
     };
     return { profile_data}
 
 }
 router.post('/field_list',(req,res)=>{
-    var fieldlist=new FieldList(req.body);
+    var field=new Field(req.body);
     console.log(req.body.field);
-    fieldlist.save((err,fieldlist)=>{
+    field.save((err,field)=>{
         if(err){
             return res.status(400).json({err});
         }else{
-            console.log(fieldlist);
+            console.log(field);
             return res.status(201).json({success:true})
         }
     })
@@ -40,9 +39,9 @@ router.post('/field_list',(req,res)=>{
 router.post('/', auth, async (req, res) => {
     const {profile_data} = getData(req);
     for await (const item of req.body.field) {
-        await FieldList.findOne({field:item}).then((body)=>{
+        await Field.findOne({field:item}).then((body)=>{
             if(body){
-                profile_data.fields.push(item);
+                profile_data.fields.push({field_uid:body._id});
             }
         })
     }
@@ -54,6 +53,9 @@ router.post('/', auth, async (req, res) => {
         } else if (result) {
             return res.status(400).json({ msg: "이미 프로필이 등록 되어 있습니다." });
         } else {
+            profile.tags.push(...req.body.tag);
+            console.log(req.body.tag);
+            profile.location.push(...req.body.location);
             profile.save((err,profile)=>{
                 if(err){
                     return res.status(400).json({msg:err});
@@ -96,21 +98,29 @@ router.put('/:nickname', auth, (req, res) => {
         if (err) {
             return res.status(400).json({ msg: err });
         } else if (user._id.equals(profile.user_uid)) {
-            const { profile_data} = getData(req);
+            const { profile_data,tag_data} = getData(req);
             for await (const item of req.body.field) {
-                await FieldList.findOne({field:item}).then((body)=>{
+                await Field.findOne({field:item}).then((body)=>{
                     if(body){
-                        profile_data.fields.push(item);
+                        profile_data.fields.push({field_uid:body._id});
                     }
                 })
+            }
+            for await (const item of req.body.tag) {
+                profile_data.tags.push({tag:item});
             }
             Profile.findOneAndReplace({ nickname: req.params.nickname }, profile_data, { returnDocument: true }, (err, profile) => {
                 if (err) {
                     return res.status(400).json({ msg: err });
                 } else if (profile) {
-                    console.log(profile);
-                    return res.status(201).json({success:true});
-                    
+                    profile.location.push(...req.body.location);
+                    profile.save((err,profile)=>{
+                        if(err){
+                            return res.status(400).json({msg:err});
+                        }else{
+                            return res.status(201).json({success:true});
+                        }
+                    })
                 } else {
                     return res.status(400).json({ msg: err });
                 }
