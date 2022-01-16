@@ -8,7 +8,6 @@ const {
   commentPermission,
 } = require("../middleware/communityPermission");
 const { Profile } = require("../models/UserProfile/Profile");
-const { Category } = require("../models/Project/Category");
 
 router.get("/posts/:id", auth, (req, res) => {
   /* 	#swagger.tags = ['Community']
@@ -245,7 +244,6 @@ router.post("/posts/:id/hearts", auth, (req, res) => {
     userId: userId,
   };
 
-  // 커뮤니티 게시글 공감 / 공감 취소
   Community.findOne({ _id: req.params.id }, (err, community) => {
     if (err) {
       return res.status(400).json({ msg: err });
