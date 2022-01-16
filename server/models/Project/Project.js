@@ -18,7 +18,7 @@ const applicantSchema = mongoose.Schema({
 });
 
 // 초대
-const InviteSchema = mongoose.Schema({
+const inviteSchema = mongoose.Schema({
   userId: {
     type: mongoose.Schema.Types.ObjectId,
     ref: "User",
@@ -81,7 +81,8 @@ const projectSchema = mongoose.Schema({
       },
     },
   ],
-  invites: [InviteSchema],
+  invites: [inviteSchema],
+  bookmarks: [bookmarkSchema],
 });
 
 projectSchema.methods.updateViews = function (cb) {
@@ -94,5 +95,7 @@ projectSchema.methods.updateViews = function (cb) {
 const Project = mongoose.model("Project", projectSchema);
 const Applicant = mongoose.model("Applicant", applicantSchema);
 const Member = mongoose.model("Member", memberSchema);
-const Invite = mongoose.model("Invite", InviteSchema);
-module.exports = { Project, Applicant, Member, Invite };
+const Invite = mongoose.model("Invite", inviteSchema);
+const Bookmark = mongoose.model("Bookmark", bookmarkSchema);
+
+module.exports = { Project, Applicant, Member, Invite, Bookmark };

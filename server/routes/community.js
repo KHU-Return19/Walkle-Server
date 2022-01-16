@@ -240,7 +240,7 @@ router.post("/posts/:id/hearts", auth, (req, res) => {
   /* 	#swagger.tags = ['Community']
       #swagger.summary = "커뮤니티 게시글 공감 / 공감 취소"*/
   const userId = req.user._id;
-  let newHeart = {
+  const newHeart = {
     userId: userId,
   };
 

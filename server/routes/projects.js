@@ -36,7 +36,7 @@ router.get("/posts", auth, (req, res) => {
 });
 
 // 프로젝트 게시글 작성
-router.post("/posts", auth, postPermission, (req, res) => {
+router.post("/posts", auth, (req, res) => {
   const newProject = new Project({
     userId: req.user._id,
     title: req.body.title,
@@ -87,7 +87,7 @@ router.post("/posts", auth, postPermission, (req, res) => {
 });
 
 // 프로젝트 게시글 수정
-router.put("/posts/:id", auth, async (req, res) => {
+router.put("/posts/:id", auth, postPermission, async (req, res) => {
   const projectId = req.params.id;
   const update = {
     title: req.body.title,
@@ -162,115 +162,42 @@ router.get("/category", (req, res) => {
   });
 });
 
-// Save project member
-const saveProjectMember = (projectId, memberIdList) => {
-  ProjectUser.deleteMany({ projectId: projectId }, (err, deleted) => {
-    for (const userId of memberIdList) {
-      const newProjectUser = new ProjectUser({
-        userId: userId,
-        projectId: projectId,
-      });
-      newProjectUser.save();
-    }
-  });
-};
-
-// Save project category
-const saveProjectCategory = (projectId, categoryIdList) => {
-  ProjectCategory.deleteMany({ projectId: projectId }, (err, deleted) => {
-    for (const categoryId of categoryIdList) {
-      const newProjectCategory = new ProjectCategory({
-        projectId: projectId,
-        categoryId: categoryId,
-      });
-      newProjectCategory.save();
-    }
-  });
-};
-
-// Save bookmark
-router.post("/bookmark", auth, (req, res) => {
-  Project.findOne({ id: req.query.projectId }, (err, project) => {
+router.post("/posts/:id/bookmarks", auth, (req, res) => {
+  const userId = req.user._id;
+  const newBookmark = {
+    userId: userId,
+  };
+  Project.findOne({ _id: req.params.id }, (err, project) => {
     if (err) {
       return res.status(400).json({ msg: err });
     } else if (!project) {
       return res.status(400).json({ msg: "Project Not Found" });
     } else {
-      const newBookmark = new Bookmark({
-        userId: req.user._id,
-        projectId: project.id,
-      });
-      newBookmark.save((err, saved) => {
-        if (err) {
-          return res.status(400).json({ msg: err });
-        } else {
-          return res.status(201).json({ bookmarkId: saved._id });
-        }
-      });
-    }
-  });
-});
+      const bookmarks = project.bookmarks;
+      const bookmark = bookmarks.filter((e) => userId.equals(e.userId));
+      if (bookmark.length === 0) {
+        // 북마크
+        project.bookmarks.push(newBookmark);
 
-// Delete Bookmark
-router.delete("/bookmark/:id", auth, (req, res) => {
-  Bookmark.findOne({ id: req.params.id }, (err, bookmark) => {
-    if (err) {
-      return res.status(400).json({ msg: err });
-    } else if (!bookmark) {
-      return res.status(400).json({ msg: "Bookmark Not Found" });
-    } else {
-      bookmark.delete((err, deleted) => {
-        if (err) {
-          return res.status(400).json({ msg: err });
-        } else {
-          return res.status(204).json();
-        }
-      });
-    }
-  });
-});
-
-// Read Bookmark
-router.get("/bookmark", auth, (req, res) => {
-  Bookmark.find({ userId: req.user._id })
-    .exec()
-    .then(async (bookmarks) => {
-      const response = [];
-
-      for (const bookmark of bookmarks) {
-        Project.findOne({ id: bookmark.projectId })
-          .exec()
-          .then(async (project) => {
-            console.log("s");
-            response.push({
-              id: project.id,
-              title: project.title,
-              introduction: project.introduction,
-              status: project.status,
-              views: project.views,
-              createdAt: project.createdAt,
-              nickname: await Profile.getnickname(project.userId),
-            });
-          });
+        project.save((err, sace) => {
+          if (err) {
+            return res.status(400).json({ msg: err });
+          } else {
+            return res.status(201).json({ projectId: project._id });
+          }
+        });
+      } else {
+        const removed = project.bookmarks.id(bookmark[0]._id);
+        removed.remove();
+        project.save((err, sace) => {
+          if (err) {
+            return res.status(400).json({ msg: err });
+          } else {
+            return res.status(204).json(null);
+          }
+        });
       }
-      return res.status(200).json({ bookmarks: response });
-    });
-});
-
-// Add project category
-router.post("/category", auth, (req, res) => {
-  const newCategory = new Category({
-    name: req.body.name,
-  });
-  newCategory.save((err, saved) => {
-    return res.status(201).json({ id: saved.id });
-  });
-});
-
-// Read project category
-router.get("/category", auth, (req, res) => {
-  Category.find((err, categories) => {
-    return res.status(200).json({ categories: categories });
+    }
   });
 });
 module.exports = router;
