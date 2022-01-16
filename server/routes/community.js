@@ -21,7 +21,6 @@ router.get("/posts/:id", auth, (req, res) => {
       community.updateViews(async () => {
         const commentResponse = [];
         for (const comment of community.comments) {
-          console.log(comment);
           commentResponse.push({
             _id: comment.id,
             content: comment.content,
@@ -49,30 +48,19 @@ router.get("/posts/:id", auth, (req, res) => {
   });
 });
 
-router.get("/posts", auth, (req, res) => {
+router.get("/posts", auth, async (req, res) => {
   /* 	#swagger.tags = ['Community']
       #swagger.summary = "커뮤니티 게시글 목록 조회" */
-  Community.find()
-    .sort({ createdAt: -1 })
-    .then(async (communities) => {
-      const response = [];
-      for (const community of communities) {
-        response.push({
-          id: community.id,
-          userId: community.userId,
-          title: community.title,
-          content: community.content,
-          createdAt: community.createdAt,
-          views: community.views,
-          lat: community.lat,
-          lon: community.lon,
-          comments: community.comments.length,
-          hearts: community.hearts.length,
-          nickname: await Profile.getnickname(community.userId),
-        });
-      }
-      return res.status(200).json({ communities: response });
-    });
+  const response = [];
+
+  const communities = await Community.find().sort({ createdAt: -1 });
+
+  for (const community of communities) {
+    const result = await communityListRes(community);
+    response.push(result);
+  }
+
+  return res.status(200).json({ communities: response });
 });
 
 router.get("/users/:userId", auth, (req, res) => {
@@ -103,6 +91,22 @@ router.get("/users/:userId", auth, (req, res) => {
     });
 });
 
+const communityListRes = async (community) => {
+  res = {
+    id: community.id,
+    userId: community.userId,
+    title: community.title,
+    content: community.content,
+    createdAt: community.createdAt,
+    views: community.views,
+    lat: community.lat,
+    lon: community.lon,
+    comments: community.comments.length,
+    hearts: community.hearts.length,
+    nickname: await Profile.getnickname(community.userId),
+  };
+  return res;
+};
 router.post("/posts", auth, (req, res) => {
   /* 	#swagger.tags = ['Community']
       #swagger.summary = "커뮤니티 게시글 작성" */
