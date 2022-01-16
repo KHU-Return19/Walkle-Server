@@ -6,33 +6,35 @@ const { auth } = require("../middleware/auth");
 const { postPermission } = require("../middleware/projectPermission");
 const { Category } = require("../models/Project/Category");
 const { Profile } = require("../models/UserProfile/Profile");
+const { response } = require("express");
 
 // 프로젝트 게시글 조회
-router.get("/posts/:id", auth, (req, res) => {
+router.get("/posts/:id", auth, async (req, res) => {
   const projectId = req.params.id;
-  Project.findOne({ _id: projectId })
-    .populate("categories.categoryId", { _id: 1, name: 2 })
-    .then((project) => {
-      if (!project) {
-        return res.status(400).json({ msg: "Project Not Found" });
-      } else {
-        // 조회수 업데이트
-        project.updateViews(async () => {
-          return res.status(200).json({ project: project });
-        });
-      }
+  const project = await Project.findOne({ _id: projectId }).populate(
+    "categories.categoryId",
+    { _id: 1, name: 2 }
+  );
+
+  if (!project) {
+    return res.status(400).json({ msg: "Project Not Found" });
+  } else {
+    // 조회수 업데이트
+    project.updateViews(async () => {
+      const response = await projectRes(project, req.user._id);
+      return res.status(200).json({ project: response });
     });
+  }
 });
 
 // 프로젝트 게시글 목록 조회
-router.get("/posts", auth, (req, res) => {
-  const projectId = req.params.id;
-  Project.find()
+router.get("/posts", auth, async (req, res) => {
+  const projects = await Project.find()
     .sort({ createdAt: -1 })
-    .populate("categories.categoryId", { _id: 1, name: 2 })
-    .then((projects) => {
-      return res.status(200).json({ project: projects });
-    });
+    .populate("categories.categoryId", { _id: 1, name: 2 });
+  const response = await projectListRes(projects, req.user._id);
+
+  return res.status(200).json({ project: response });
 });
 
 // 프로젝트 게시글 작성
@@ -40,9 +42,11 @@ router.post("/posts", auth, (req, res) => {
   const newProject = new Project({
     userId: req.user._id,
     title: req.body.title,
-    introduction: req.body.introduction,
+    content: req.body.content,
     description: req.body.description,
     status: req.body.status,
+    lon: req.body.lon,
+    lat: req.body.lat,
   });
 
   // 모집 상태 구분
@@ -91,9 +95,11 @@ router.put("/posts/:id", auth, postPermission, async (req, res) => {
   const projectId = req.params.id;
   const update = {
     title: req.body.title,
-    introduction: req.body.introduction,
+    content: req.body.content,
     description: req.body.description,
     status: req.body.status,
+    lon: req.body.lon,
+    lat: req.body.lat,
   };
 
   // 모집 상태 구분
@@ -202,16 +208,18 @@ router.post("/posts/:id/bookmarks", auth, (req, res) => {
   });
 });
 
-router.get("/users/:userId/bookmarks", auth, (req, res) => {
+router.get("/users/:userId/bookmarks", auth, async (req, res) => {
   /* 	#swagger.tags = ['Project']
-      #swagger.summary = "공감한 프로젝트 게시글 조회"*/
+      #swagger.summary = "북마크한 프로젝트 게시글 조회"*/
   const userId = req.params.userId;
 
-  Project.find({ "bookmarks.userId": userId })
-    .sort({ createdAt: -1 })
-    .then(async (projects) => {
-      return res.status(200).json({ project: projects });
-    });
+  const projects = await Project.find({ "bookmarks.userId": userId }).sort({
+    createdAt: -1,
+  });
+
+  const response = await projectListRes(projects, userId);
+
+  return res.status(200).json({ project: response });
 });
 
 // 프로젝트 참가자 수정
@@ -260,4 +268,99 @@ router.put("/posts/:id/invites", auth, async (req, res) => {
   await Project.updateOne({ _id: projectId }, update);
   return res.status(200).json({ projectId: projectId });
 });
+
+// response
+// 프로젝트 게시글 목록
+const projectListRes = async (projects, userId) => {
+  const repsonse = [];
+  for (const project of projects) {
+    const projectResponse = await projectRes(project, userId);
+    repsonse.push(projectResponse);
+  }
+  return repsonse;
+};
+// 프로젝트 게시글
+const projectRes = async (project, userId) => {
+  const response = {
+    id: project.id,
+    userId: project.userId,
+    nickname: await Profile.getNickname(project.userId),
+    title: project.title,
+    content: project.content,
+    description: project.description,
+    status: project.status,
+    startAt: project.startAt,
+    endAt: project.endAt,
+    lat: project.lat,
+    lon: project.lon,
+    createdAt: project.createdAt,
+  };
+
+  // 태그
+  const tags = [];
+  for (tag of project.tags) {
+    tags.push(tag.name);
+  }
+  response.tags = tags;
+
+  // 참가자
+  const members = [];
+  for (member of project.members) {
+    members.push({
+      userId: member.userId,
+      nickname: await Profile.getNickname(member.userId),
+      job: await Profile.getJob(member.userId),
+    });
+  }
+  response.members = members;
+
+  // 지원자
+  const applicants = [];
+  for (applicant of project.applicants) {
+    applicants.push({
+      userId: applicant.userId,
+      nickname: await Profile.getNickname(applicant.userId),
+      job: await Profile.getJob(applicant.userId),
+    });
+  }
+  response.applicants = applicants;
+
+  // 지원자
+  const invites = [];
+  for (invite of project.invites) {
+    invites.push({
+      userId: invite.userId,
+      nickname: await Profile.getNickname(invite.userId),
+      job: await Profile.getJob(invite.userId),
+    });
+  }
+  response.invites = invites;
+
+  // 카테고리
+  const categories = [];
+  for (category of project.categories) {
+    if (!category) {
+      categories.push({
+        categoryId: category.categoryId._id,
+        name: category.categoryId.name,
+      });
+    }
+  }
+  response.categories = categories;
+
+  // 북마크
+  const bookmark = await Project.find({
+    _id: project._id,
+    "bookmarks.userId": userId,
+  }).sort({ createdAt: -1 });
+  if (!bookmark) {
+    response.isBookmarked = false;
+  } else {
+    response.isBookmarked = true;
+  }
+
+  response.bookmarks = project.bookmarks.length;
+
+  return response;
+};
 module.exports = router;

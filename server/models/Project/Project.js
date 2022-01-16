@@ -43,7 +43,7 @@ const projectSchema = mongoose.Schema({
     type: String,
     required: true,
   },
-  introduction: {
+  content: {
     type: String,
     defulat: "",
   },
@@ -65,6 +65,12 @@ const projectSchema = mongoose.Schema({
   views: {
     type: Number,
     default: 0,
+  },
+  lat: {
+    type: Number,
+  },
+  lon: {
+    type: Number,
   },
   createdAt: {
     type: Date,

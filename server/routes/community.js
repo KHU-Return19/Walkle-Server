@@ -26,14 +26,8 @@ router.get("/posts/:id", auth, async (req, res) => {
 router.get("/posts", auth, async (req, res) => {
   /* 	#swagger.tags = ['Community']
       #swagger.summary = "커뮤니티 게시글 목록 조회" */
-  const response = [];
   const communities = await Community.find().sort({ createdAt: -1 });
-
-  for (const community of communities) {
-    const communityRes = await communityListRes(community);
-    response.push(communityRes);
-  }
-
+  const response = await communityListRes(communities);
   return res.status(200).json({ communities: response });
 });
 
@@ -41,15 +35,12 @@ router.get("/users/:userId", auth, async (req, res) => {
   /* 	#swagger.tags = ['Community']
       #swagger.summary = "작성자별 커뮤니티 게시글 조회" */
   const userId = req.params.userId;
-  const response = [];
   const communities = await Community.find({ userId: userId }).sort({
     createdAt: -1,
   });
 
-  for (const community of communities) {
-    const communityRes = await communityListRes(community);
-    response.push(communityRes);
-  }
+  const response = await communityListRes(communities);
+
   return res.status(200).json({ communities: response });
 });
 
@@ -136,7 +127,7 @@ router.get("/posts/:id/comments/:commentId", auth, async (req, res) => {
     _id: comment.id,
     content: comment.content,
     userId: comment.userId,
-    nickname: await Profile.getnickname(comment.userId),
+    nickname: await Profile.getNickname(comment.userId),
     createdAt: comment.createdAt,
   });
 
@@ -227,35 +218,36 @@ router.get("/users/:userId/hearts", auth, async (req, res) => {
   /* 	#swagger.tags = ['Community']
       #swagger.summary = "공감한 커뮤니티 게시글 조회"*/
   const userId = req.params.userId;
-  const response = [];
 
   const communities = await Community.find({ "hearts.userId": userId }).sort({
     createdAt: -1,
   });
 
-  for (const community of communities) {
-    const communityRes = await communityListRes(community);
-    response.push(communityRes);
-  }
+  const response = await communityListRes(communities);
+
   return res.status(200).json({ communities: response });
 });
 
 // response
 // 커뮤니티 게시글 목록
-const communityListRes = async (community) => {
-  response = {
-    id: community.id,
-    userId: community.userId,
-    title: community.title,
-    content: community.content,
-    createdAt: community.createdAt,
-    views: community.views,
-    lat: community.lat,
-    lon: community.lon,
-    comments: community.comments.length,
-    hearts: community.hearts.length,
-    nickname: await Profile.getnickname(community.userId),
-  };
+const communityListRes = async (communities) => {
+  const response = [];
+  for (const community of communities) {
+    const communityRes = {
+      id: community.id,
+      userId: community.userId,
+      title: community.title,
+      content: community.content,
+      createdAt: community.createdAt,
+      views: community.views,
+      lat: community.lat,
+      lon: community.lon,
+      comments: community.comments.length,
+      hearts: community.hearts.length,
+      nickname: await Profile.getNickname(community.userId),
+    };
+    response.push(communityRes);
+  }
   return response;
 };
 
@@ -267,14 +259,14 @@ const communityRes = async (community) => {
       _id: comment.id,
       content: comment.content,
       userId: comment.userId,
-      nickname: await Profile.getnickname(comment.userId),
+      nickname: await Profile.getNickname(comment.userId),
       createdAt: comment.createdAt,
     });
   }
   const response = {
     id: community.id,
     userId: community.userId,
-    nickname: await Profile.getnickname(community.userId),
+    nickname: await Profile.getNickname(community.userId),
     title: community.title,
     content: community.content,
     lat: community.lat,
