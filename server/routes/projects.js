@@ -2,73 +2,37 @@ const express = require("express");
 const router = express.Router();
 
 const { Project } = require("../models/Project/Project");
-const { ProjectUser } = require("../models/Project/ProjectUser");
 const { auth } = require("../middleware/auth");
 const { postPermission } = require("../middleware/projectPermission");
 const { Category } = require("../models/Project/Category");
 const { Profile } = require("../models/UserProfile/Profile");
-const { Bookmark } = require("../models/Project/Bookmark");
-const { ProjectCategory } = require("../models/Project/ProjectCategoty");
 
-// Read project
+// 프로젝트 게시글 조회
 router.get("/posts/:id", auth, (req, res) => {
   const projectId = req.params.id;
-  Project.findOne({ id: projectId }, (err, project) => {
+  Project.findOne({ _id: projectId }, (err, project) => {
     if (err) {
       return res.status(400).json({ msg: err });
     } else if (!project) {
       return res.status(400).json({ msg: "Project Not Found" });
     } else {
-      // Update views
+      // 조회수 업데이트
       project.updateViews(async () => {
-        // Get MemberList
-        const memberIdList = [];
-        ProjectUser.find(
-          { projectId: projectId },
-          async (err, projectUsers) => {
-            for (const projectUser of projectUsers) {
-              memberIdList.push(projectUser.userId);
-            }
-            // Get tags
-            const tags = [];
-            for (const tag of project.tags) {
-              tags.push(tag.name);
-            }
-            // Get categories
-            const categoryIdList = [];
-            ProjectCategory.find(
-              { projectId: projectId },
-              async (err, projectCategories) => {
-                for (projectCategory of projectCategories) {
-                  categoryIdList.push(projectCategory.categoryId);
-                }
-                const response = {
-                  id: project.id,
-                  userId: project.userId,
-                  title: project.title,
-                  introduction: project.introduction,
-                  description: project.description,
-                  status: project.status,
-                  recruitStart: project.recruitStart,
-                  recruitEnd: project.recruitEnd,
-                  views: project.views,
-                  createdAt: project.createdAt,
-                  tags: tags,
-                  nickname: await Profile.getnickname(project.userId),
-                  memberIdList: memberIdList,
-                  categoryIdList: categoryIdList,
-                };
-                return res.status(200).json({ communities: response });
-              }
-            );
-          }
-        );
+        return res.status(200).json({ project: project });
       });
     }
   });
 });
 
-// Write project
+// 프로젝트 게시글 목록 조회
+router.get("/posts", auth, (req, res) => {
+  const projectId = req.params.id;
+  Project.find((err, project) => {
+    return res.status(200).json({ project: project });
+  });
+});
+
+// 프로젝트 게시글 작성
 router.post("/posts", auth, (req, res) => {
   const newProject = new Project({
     userId: req.user._id,
@@ -77,29 +41,35 @@ router.post("/posts", auth, (req, res) => {
     description: req.body.description,
     status: req.body.status,
   });
+
+  // 모집 상태 구분
   if (req.body.status == 1) {
+    // 0 : 상시모집, 1 : 기간 내 모집, 2 : 모집 종료
     newProject.recruitStart = req.body.recruitStart;
     newProject.recruitEnd = req.body.recruitEnd;
   }
+
+  // 태그
   for (const tag of req.body.tags) {
     const newTag = {
       name: tag,
     };
     newProject.tags.push(newTag);
   }
-  newProject.save((err, saved) => {
+
+  // 참가자
+  for (const memberId of req.body.memberIdList) {
+    const newMember = {
+      userId: memberId,
+    };
+    newProject.members.push(newMember);
+  }
+
+  newProject.save((err, project) => {
     if (err) {
       return res.status(400).json({ msg: err });
     } else {
-      // Save project member
-      const memberIdList = req.body.memberIdList;
-      memberIdList.push(req.user._id);
-      saveProjectMember(saved.id, memberIdList);
-
-      // Save project category
-      saveProjectCategory(saved.id, req.body.categoryIdList);
-
-      return res.status(201).json({ projectId: saved.id });
+      return res.status(201).json({ projectId: project._id });
     }
   });
 });

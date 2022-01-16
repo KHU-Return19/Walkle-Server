@@ -1,7 +1,37 @@
 const mongoose = require("mongoose");
+const { Category } = require("./Category");
 
-const autoIncrement = require("mongoose-auto-increment");
-autoIncrement.initialize(mongoose.connection);
+// 참가
+const memberSchema = mongoose.Schema({
+  userId: {
+    type: mongoose.Schema.Types.ObjectId,
+    ref: "User",
+  },
+});
+
+// 지원
+const applicantSchema = mongoose.Schema({
+  userId: {
+    type: mongoose.Schema.Types.ObjectId,
+    ref: "User",
+  },
+});
+
+// 초대
+const InviteSchema = mongoose.Schema({
+  userId: {
+    type: mongoose.Schema.Types.ObjectId,
+    ref: "User",
+  },
+});
+
+// 북마크
+const bookmarkSchema = mongoose.Schema({
+  userId: {
+    type: mongoose.Schema.Types.ObjectId,
+    ref: "User",
+  },
+});
 
 const projectSchema = mongoose.Schema({
   userId: {
@@ -12,10 +42,6 @@ const projectSchema = mongoose.Schema({
   title: {
     type: String,
     required: true,
-  },
-  id: {
-    type: Number,
-    default: 1,
   },
   introduction: {
     type: String,
@@ -28,11 +54,11 @@ const projectSchema = mongoose.Schema({
   status: {
     type: Number,
   },
-  recruitStart: {
+  startAt: {
     type: Date,
     default: null,
   },
-  recruitEnd: {
+  endAt: {
     type: Date,
     default: null,
   },
@@ -45,13 +71,10 @@ const projectSchema = mongoose.Schema({
     default: Date.now,
   },
   tags: [{ name: String }],
-});
-
-projectSchema.plugin(autoIncrement.plugin, {
-  model: "project",
-  field: "id",
-  startAt: 1,
-  increment: 1,
+  members: [memberSchema],
+  applicants: [applicantSchema],
+  categories: [{ categoryId: mongoose.Schema.Types.ObjectId }],
+  invites: [InviteSchema],
 });
 
 projectSchema.methods.updateViews = function (cb) {
@@ -62,4 +85,7 @@ projectSchema.methods.updateViews = function (cb) {
 };
 
 const Project = mongoose.model("Project", projectSchema);
-module.exports = { Project };
+const Applicant = mongoose.model("Applicant", applicantSchema);
+const Member = mongoose.model("Member", memberSchema);
+const Invite = mongoose.model("Invite", InviteSchema);
+module.exports = { Project, Applicant, Member, Invite };
