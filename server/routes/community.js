@@ -280,7 +280,7 @@ router.post("/posts/:id/hearts", auth, (req, res) => {
 
 router.get("/users/:userId/hearts", auth, (req, res) => {
   /* 	#swagger.tags = ['Community']
-      #swagger.summary = "공감한 글 조회"*/
+      #swagger.summary = "공감한 커뮤니티 게시글 조회"*/
   const userId = req.params.userId;
 
   Community.find({ "hearts.userId": userId })

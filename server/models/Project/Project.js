@@ -73,7 +73,14 @@ const projectSchema = mongoose.Schema({
   tags: [{ name: String }],
   members: [memberSchema],
   applicants: [applicantSchema],
-  categories: [{ categoryId: mongoose.Schema.Types.ObjectId }],
+  categories: [
+    {
+      categoryId: {
+        type: mongoose.Schema.Types.ObjectId,
+        ref: "Category",
+      },
+    },
+  ],
   invites: [InviteSchema],
 });
 
