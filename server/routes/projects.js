@@ -162,6 +162,7 @@ router.get("/category", (req, res) => {
   });
 });
 
+// 프로젝트 게시글 북마크 / 북마크 취소
 router.post("/posts/:id/bookmarks", auth, (req, res) => {
   const userId = req.user._id;
   const newBookmark = {
@@ -199,5 +200,64 @@ router.post("/posts/:id/bookmarks", auth, (req, res) => {
       }
     }
   });
+});
+
+router.get("/users/:userId/bookmarks", auth, (req, res) => {
+  /* 	#swagger.tags = ['Project']
+      #swagger.summary = "공감한 프로젝트 게시글 조회"*/
+  const userId = req.params.userId;
+
+  Project.find({ "bookmarks.userId": userId })
+    .sort({ createdAt: -1 })
+    .then(async (projects) => {
+      return res.status(200).json({ project: projects });
+    });
+});
+
+// 프로젝트 참가자 수정
+router.put("/posts/:id/members", auth, async (req, res) => {
+  const projectId = req.params.id;
+  const update = {};
+  // 참가자
+  update.members = [];
+  for (const memberId of req.body.memberIdList) {
+    const newMember = {
+      userId: memberId,
+    };
+    update.members.push(newMember);
+  }
+  await Project.updateOne({ _id: projectId }, update);
+  return res.status(200).json({ projectId: projectId });
+});
+
+// 프로젝트 지원자 수정
+router.put("/posts/:id/applicants", auth, async (req, res) => {
+  const projectId = req.params.id;
+  const update = {};
+  // 참가자
+  update.applicants = [];
+  for (const applicantId of req.body.applicantIdList) {
+    const newApplicant = {
+      userId: applicantId,
+    };
+    update.applicants.push(newApplicant);
+  }
+  await Project.updateOne({ _id: projectId }, update);
+  return res.status(200).json({ projectId: projectId });
+});
+// 프로젝트 참가자 초대 수정
+router.put("/posts/:id/invites", auth, async (req, res) => {
+  const projectId = req.params.id;
+  const update = {};
+  // 참가자
+  update.invites = [];
+  for (const inviteId of req.body.inviteIdList) {
+    const newInvite = {
+      userId: inviteId,
+    };
+    update.invites.push(newInvite);
+  }
+  await Project.updateOne({ _id: projectId }, update);
+  return res.status(200).json({ projectId: projectId });
 });
 module.exports = router;
