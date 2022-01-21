@@ -27,8 +27,9 @@ router.get("/posts/:id", auth, async (req, res) => {
   }
 });
 
-// 프로젝트 게시글 목록 조회
 router.get("/posts", auth, async (req, res) => {
+  /* 	#swagger.tags = ['Project']
+      #swagger.summary = "프로젝트 게시글 목록 조회"*/
   const projects = await Project.find()
     .sort({ createdAt: -1 })
     .populate("categories.categoryId", { _id: 1, name: 2 });
@@ -37,8 +38,9 @@ router.get("/posts", auth, async (req, res) => {
   return res.status(200).json({ project: response });
 });
 
-// 프로젝트 게시글 작성
 router.post("/posts", auth, (req, res) => {
+  /* 	#swagger.tags = ['Project']
+      #swagger.summary = "프로젝트 게시글 작성"*/
   const newProject = new Project({
     userId: req.user._id,
     title: req.body.title,
@@ -253,6 +255,7 @@ router.put("/posts/:id/applicants", auth, async (req, res) => {
   await Project.updateOne({ _id: projectId }, update);
   return res.status(200).json({ projectId: projectId });
 });
+
 // 프로젝트 참가자 초대 수정
 router.put("/posts/:id/invites", auth, async (req, res) => {
   const projectId = req.params.id;
@@ -267,6 +270,39 @@ router.put("/posts/:id/invites", auth, async (req, res) => {
   }
   await Project.updateOne({ _id: projectId }, update);
   return res.status(200).json({ projectId: projectId });
+});
+
+// 참가 프로젝트 조회
+router.get("/user/:id/members", auth, async (req, res) => {
+  const userId = req.params.id;
+
+  const projects = await Project.find({ "members.userId": userId });
+
+  const response = await projectListRes(projects);
+
+  return res.status(200).json({ projects: response });
+});
+
+// 지원 프로젝트 조회
+router.get("/user/:id/applicants", auth, async (req, res) => {
+  const userId = req.params.id;
+
+  const projects = await Project.find({ "applicants.userId": userId });
+
+  const response = await projectListRes(projects);
+
+  return res.status(200).json({ projects: response });
+});
+
+// 초대받은 프로젝트 조회
+router.get("/user/:id/invites", auth, async (req, res) => {
+  const userId = req.params.id;
+
+  const projects = await Project.find({ "invites.userId": userId });
+
+  const response = await projectListRes(projects);
+
+  return res.status(200).json({ projects: response });
 });
 
 // response
