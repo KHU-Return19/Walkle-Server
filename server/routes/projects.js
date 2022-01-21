@@ -92,8 +92,9 @@ router.post("/posts", auth, (req, res) => {
   });
 });
 
-// 프로젝트 게시글 수정
 router.put("/posts/:id", auth, postPermission, async (req, res) => {
+  /* 	#swagger.tags = ['Project']
+      #swagger.summary = "프로젝트 게시글 수정"*/
   const projectId = req.params.id;
   const update = {
     title: req.body.title,
@@ -141,8 +142,9 @@ router.put("/posts/:id", auth, postPermission, async (req, res) => {
   return res.status(200).json({ projectId: projectId });
 });
 
-// 프로젝트 게시글 삭제
 router.delete("/posts/:id", auth, postPermission, (req, res) => {
+  /* 	#swagger.tags = ['Project']
+      #swagger.summary = "프로젝트 게시글 삭제"*/
   const project = req.project;
   project.delete((err, deleted) => {
     if (err) {
@@ -153,8 +155,9 @@ router.delete("/posts/:id", auth, postPermission, (req, res) => {
   });
 });
 
-// 프로젝트 카테고리 등록
 router.post("/category", (req, res) => {
+  /* 	#swagger.tags = ['Project']
+      #swagger.summary = "프로젝트 카테고리 등록"*/
   const newCategory = new Category({
     name: req.body.name,
   });
@@ -163,15 +166,17 @@ router.post("/category", (req, res) => {
   });
 });
 
-// 프로젝트 카테고리 전체 조회
 router.get("/category", (req, res) => {
+  /* 	#swagger.tags = ['Project']
+      #swagger.summary = "프로젝트 카테고리 전체 조회"*/
   Category.find((err, categories) => {
     return res.status(200).json({ categories: categories });
   });
 });
 
-// 프로젝트 게시글 북마크 / 북마크 취소
 router.post("/posts/:id/bookmarks", auth, (req, res) => {
+  /* 	#swagger.tags = ['Project']
+      #swagger.summary = "프로젝트 게시글 북마크 / 북마크 취소"*/
   const userId = req.user._id;
   const newBookmark = {
     userId: userId,
@@ -224,8 +229,9 @@ router.get("/users/:userId/bookmarks", auth, async (req, res) => {
   return res.status(200).json({ project: response });
 });
 
-// 프로젝트 참가자 수정
 router.put("/posts/:id/members", auth, async (req, res) => {
+  /* 	#swagger.tags = ['Project']
+      #swagger.summary = "프로젝트 참가자 수정"*/
   const projectId = req.params.id;
   const update = {};
   // 참가자
@@ -240,8 +246,9 @@ router.put("/posts/:id/members", auth, async (req, res) => {
   return res.status(200).json({ projectId: projectId });
 });
 
-// 프로젝트 지원자 수정
 router.put("/posts/:id/applicants", auth, async (req, res) => {
+  /* 	#swagger.tags = ['Project']
+      #swagger.summary = "프로젝트 지원자 수정"*/
   const projectId = req.params.id;
   const update = {};
   // 참가자
@@ -256,8 +263,9 @@ router.put("/posts/:id/applicants", auth, async (req, res) => {
   return res.status(200).json({ projectId: projectId });
 });
 
-// 프로젝트 참가자 초대 수정
 router.put("/posts/:id/invites", auth, async (req, res) => {
+  /* 	#swagger.tags = ['Project']
+      #swagger.summary = "프로젝트 참가자 초대 수정"*/
   const projectId = req.params.id;
   const update = {};
   // 참가자
@@ -272,8 +280,9 @@ router.put("/posts/:id/invites", auth, async (req, res) => {
   return res.status(200).json({ projectId: projectId });
 });
 
-// 참가 프로젝트 조회
 router.get("/user/:id/members", auth, async (req, res) => {
+  /* 	#swagger.tags = ['Project']
+      #swagger.summary = "참가 프로젝트 조회"*/
   const userId = req.params.id;
 
   const projects = await Project.find({ "members.userId": userId });
@@ -283,8 +292,10 @@ router.get("/user/:id/members", auth, async (req, res) => {
   return res.status(200).json({ projects: response });
 });
 
-// 지원 프로젝트 조회
 router.get("/user/:id/applicants", auth, async (req, res) => {
+  /* 	#swagger.tags = ['Project']
+      #swagger.summary = "지원 프로젝트 조회"*/
+
   const userId = req.params.id;
 
   const projects = await Project.find({ "applicants.userId": userId });
@@ -294,8 +305,9 @@ router.get("/user/:id/applicants", auth, async (req, res) => {
   return res.status(200).json({ projects: response });
 });
 
-// 초대받은 프로젝트 조회
 router.get("/user/:id/invites", auth, async (req, res) => {
+  /* 	#swagger.tags = ['Project']
+      #swagger.summary = "초대받은 프로젝트 조회"*/
   const userId = req.params.id;
 
   const projects = await Project.find({ "invites.userId": userId });
