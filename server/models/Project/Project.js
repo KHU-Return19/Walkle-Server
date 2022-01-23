@@ -1,7 +1,37 @@
 const mongoose = require("mongoose");
+const { Category } = require("./Category");
 
-const autoIncrement = require("mongoose-auto-increment");
-autoIncrement.initialize(mongoose.connection);
+// 참가
+const memberSchema = mongoose.Schema({
+  userId: {
+    type: mongoose.Schema.Types.ObjectId,
+    ref: "User",
+  },
+});
+
+// 지원
+const applicantSchema = mongoose.Schema({
+  userId: {
+    type: mongoose.Schema.Types.ObjectId,
+    ref: "User",
+  },
+});
+
+// 초대
+const inviteSchema = mongoose.Schema({
+  userId: {
+    type: mongoose.Schema.Types.ObjectId,
+    ref: "User",
+  },
+});
+
+// 북마크
+const bookmarkSchema = mongoose.Schema({
+  userId: {
+    type: mongoose.Schema.Types.ObjectId,
+    ref: "User",
+  },
+});
 
 const projectSchema = mongoose.Schema({
   userId: {
@@ -13,11 +43,7 @@ const projectSchema = mongoose.Schema({
     type: String,
     required: true,
   },
-  id: {
-    type: Number,
-    default: 1,
-  },
-  introduction: {
+  content: {
     type: String,
     defulat: "",
   },
@@ -28,11 +54,11 @@ const projectSchema = mongoose.Schema({
   status: {
     type: Number,
   },
-  recruitStart: {
+  startAt: {
     type: Date,
     default: null,
   },
-  recruitEnd: {
+  endAt: {
     type: Date,
     default: null,
   },
@@ -40,18 +66,29 @@ const projectSchema = mongoose.Schema({
     type: Number,
     default: 0,
   },
+  lat: {
+    type: Number,
+  },
+  lon: {
+    type: Number,
+  },
   createdAt: {
     type: Date,
     default: Date.now,
   },
   tags: [{ name: String }],
-});
-
-projectSchema.plugin(autoIncrement.plugin, {
-  model: "project",
-  field: "id",
-  startAt: 1,
-  increment: 1,
+  members: [memberSchema],
+  applicants: [applicantSchema],
+  categories: [
+    {
+      categoryId: {
+        type: mongoose.Schema.Types.ObjectId,
+        ref: "Category",
+      },
+    },
+  ],
+  invites: [inviteSchema],
+  bookmarks: [bookmarkSchema],
 });
 
 projectSchema.methods.updateViews = function (cb) {
@@ -62,4 +99,9 @@ projectSchema.methods.updateViews = function (cb) {
 };
 
 const Project = mongoose.model("Project", projectSchema);
-module.exports = { Project };
+const Applicant = mongoose.model("Applicant", applicantSchema);
+const Member = mongoose.model("Member", memberSchema);
+const Invite = mongoose.model("Invite", inviteSchema);
+const Bookmark = mongoose.model("Bookmark", bookmarkSchema);
+
+module.exports = { Project, Applicant, Member, Invite, Bookmark };
