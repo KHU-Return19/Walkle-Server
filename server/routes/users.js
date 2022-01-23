@@ -19,7 +19,11 @@ router.post("/register", (req, res) => {
     } else if (user) {
       return res.status(400).json({ msg: "Duplicate data exists" });
     } else {
-      const user = new User(req.body);
+      const user = new User({
+        userId: req.body.userId,
+        email: req.body.email,
+        password: req.body.password,
+      });
       user.save((err, doc) => {
         if (err) {
           return res.status(400).json({ msg: err });
@@ -70,4 +74,10 @@ router.get("/logout", auth, (req, res) => {
   });
 });
 
+// TODO remove
+router.get("/all", (req, res) => {
+  User.find((err, users) => {
+    res.json(users);
+  });
+});
 module.exports = router;

@@ -1,8 +1,6 @@
 const mongoose = require("mongoose");
 
-const autoIncrement = require("mongoose-auto-increment");
-autoIncrement.initialize(mongoose.connection);
-
+// 댓글
 const commentSchema = mongoose.Schema({
   userId: {
     type: mongoose.Schema.Types.ObjectId,
@@ -17,6 +15,7 @@ const commentSchema = mongoose.Schema({
   },
 });
 
+// 공감
 const heartSchema = mongoose.Schema({
   userId: {
     type: mongoose.Schema.Types.ObjectId,
@@ -24,6 +23,7 @@ const heartSchema = mongoose.Schema({
   },
 });
 
+// 커뮤니티 게시글
 const communitySchema = mongoose.Schema({
   userId: {
     type: mongoose.Schema.Types.ObjectId,
@@ -34,10 +34,6 @@ const communitySchema = mongoose.Schema({
     type: String,
     required: true,
   },
-  id: {
-    type: Number,
-    default: 1,
-  },
   content: {
     type: String,
     required: true,
@@ -46,19 +42,18 @@ const communitySchema = mongoose.Schema({
     type: Number,
     default: 0,
   },
+  lat: {
+    type: Number,
+  },
+  lon: {
+    type: Number,
+  },
   createdAt: {
     type: Date,
     default: Date.now,
   },
   comments: [commentSchema],
   hearts: [heartSchema],
-});
-
-communitySchema.plugin(autoIncrement.plugin, {
-  model: "community",
-  field: "id",
-  startAt: 1,
-  increment: 1,
 });
 
 communitySchema.methods.updateViews = function (cb) {
@@ -69,4 +64,8 @@ communitySchema.methods.updateViews = function (cb) {
 };
 
 const Community = mongoose.model("Community", communitySchema);
-module.exports = { Community };
+const Comment = mongoose.model("Comment", commentSchema);
+
+const Heart = mongoose.model("Heart", heartSchema);
+
+module.exports = { Community, Comment, Heart };

@@ -6,7 +6,7 @@ const doc = {
     description: "Walkle Api Spec",
   },
 
-  host: "localhost:5000",
+  host: "localhost:8000",
   schemes: ["http"],
 };
 
