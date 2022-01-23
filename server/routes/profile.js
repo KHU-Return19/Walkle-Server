@@ -47,14 +47,17 @@ router.post('/', auth, async (req, res) => {
     }
     const profile = new Profile(profile_data);
     //DB에 프로필이 등록되어 있는지 확인.
-    Profile.findOne({ user_uid: req.user._id }, (err, result) => {
+    Profile.findOne({ user_uid: req.user._id }, async (err, result) => {
         if (err) {
             return res.status(400).json({ msg: err });
         } else if (result) {
             return res.status(400).json({ msg: "이미 프로필이 등록 되어 있습니다." });
         } else {
-            profile.tags.push(...req.body.tag);
-            console.log(req.body.tag);
+            // profile.tags.push(...req.body.tag); 
+            // console.log(req.body.tag);
+            for await (const item of req.body.tag) {
+                profile_data.tags.push({tag:item});
+            }
             profile.location.push(...req.body.location);
             profile.save((err,profile)=>{
                 if(err){
