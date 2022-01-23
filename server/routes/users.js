@@ -15,16 +15,16 @@ router.get("/auth", auth, (req, res) => {
 router.post("/register", (req, res) => {
   User.findOne({ userId: req.body.userId }, (err, user) => {
     if (err) {
-      return res.json({ msg: err });
+      return res.status(400).json({ msg: err });
     } else if (user) {
-      return res.json({ msg: "Duplicate data exists" });
+      return res.status(400).json({ msg: "Duplicate data exists" });
     } else {
       const user = new User(req.body);
       user.save((err, doc) => {
         if (err) {
-          return res.json({ msg: err });
+          return res.status(400).json({ msg: err });
         } else {
-          return res.json({
+          return res.status(201).json({
             _id: doc._id,
           });
         }
@@ -35,21 +35,21 @@ router.post("/register", (req, res) => {
 router.post("/login", (req, res) => {
   User.findOne({ userId: req.body.userId }, (err, user) => {
     if (err) {
-      return res.json({ msg: err });
+      return res.status(400).json({ msg: err });
     } else if (!user) {
-      return res.json({ msg: "Account does not exist" });
+      return res.status(400).json({ msg: "Account does not exist" });
     } else {
       user.checkPassword(req.body.password, (err, isMatch) => {
         if (err) {
-          return res.json({ msg: err });
+          return res.status(400).json({ msg: err });
         } else if (!isMatch) {
-          return res.json({ msg: "Wrong Password" });
+          return res.status(400).json({ msg: "Wrong Password" });
         } else {
           user.createToken((err, user) => {
             if (err) {
-              return res.json({ msg: err });
+              return res.status(400).json({ msg: err });
             } else {
-              res.cookie("auth", user.token).json({
+              res.cookie("auth", user.token).status(201).json({
                 _id: user._id,
                 userId: user.userId,
               });
