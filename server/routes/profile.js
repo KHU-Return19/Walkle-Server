@@ -36,7 +36,7 @@ router.post('/field_list',(req,res)=>{
     })
 })
 //프로필 등록
-router.post('/', auth, async (req, res) => {
+router.post('', auth, async (req, res) => {
     const {profile_data} = getData(req);
     for await (const item of req.body.field) {
         await Field.findOne({field:item}).then((body)=>{
