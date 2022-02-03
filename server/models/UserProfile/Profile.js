@@ -58,10 +58,10 @@ const profileSchema = mongoose.Schema({
     },
   ],
 });
-profileSchema.statics.getNickname = async function (user_uid) {
+profileSchema.statics.getNickname = async function (userId) {
   var user = this;
   var res;
-  await this.findOne({ user_uid })
+  await this.findOne({ userId })
     .then((result) => {
       if (result) {
         res = result.nickname;
@@ -74,10 +74,10 @@ profileSchema.statics.getNickname = async function (user_uid) {
     });
   return res;
 };
-profileSchema.statics.getJob = async function (user_uid) {
+profileSchema.statics.getJob = async function (userId) {
   var user = this;
   var res;
-  await this.findOne({ user_uid })
+  await this.findOne({ userId })
     .then((result) => {
       if (result) {
         res = result.job;
@@ -90,10 +90,10 @@ profileSchema.statics.getJob = async function (user_uid) {
     });
   return res;
 };
-profileSchema.statics.getlocation = async function (user_uid) {
+profileSchema.statics.getlocation = async function (userId) {
   var user = this;
   var res;
-  await this.findOne({ user_uid })
+  await this.findOne({ userId })
     .then((result) => {
       if (result) {
         res = [result.location];

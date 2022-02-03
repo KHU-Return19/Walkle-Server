@@ -37,6 +37,19 @@ router.post('/add_field_list',(req,res)=>{
         }
     })
 })
+router.get('/check_nickname',(req,res)=>{
+    Profile.findOne({nickname:req.query.nickname},(err,result)=>{
+        if(err){
+            res.status(400).json(err);
+        }else{
+            if(result){
+                res.status(201).json({exist:true});
+            }else{
+                res.status(201).json({exist:false});
+            }
+        }
+    })
+})
 //프로필 등록
 router.post('/', auth, async (req, res) => {
     const {profile_data} = getData(req);

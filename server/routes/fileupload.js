@@ -8,17 +8,17 @@ var storage = multer.diskStorage({
         cb(null, 'uploads/')
     },
     filename: function (req, file, cb) {
-        cb(null, `${Date.now()}.png`)
+        cb(null, `${Date.now()}_${file.originalname.split('.')[0]}.png`)
     }
 })
 var upload = multer({ storage: storage })
 router.post('/', upload.single("file"), (req, res) => {
-    const { originalname, destination, filename, path, size } = req.file
+    const { originalname, destination, filename, path, size } = req.file;
     console.log("사용자가 업로드한 파일 명 : ", originalname);
     console.log("destinatin에 저장된 파일 명 : ", filename);
     console.log("업로드된 파일의 전체 경로 ", path);
     console.log("파일의 바이트(byte 사이즈)", size);
-    res.json({ success: true, data: "Single Upload Ok",filename })
+    res.json({ success: true, data: "Single Upload Ok",filename})
 })
 router.delete('/:imageId',(req,res)=>{
     console.log(req.params.imageId);

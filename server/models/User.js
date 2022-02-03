@@ -9,11 +9,12 @@ const userSchema = mongoose.Schema({
     type: String,
     maxlength: 30,
   },
-  name:{
-    type:String
+  name: {
+    type: String
   },
   email: {
     type: String,
+    unique: true,
   },
   password: {
     type: String,
@@ -22,28 +23,42 @@ const userSchema = mongoose.Schema({
     type: String,
   },
 });
-
-userSchema.pre("save", function (next) {
-  var user = this;
-  if (user.isModified("password")) {
-    bcrypt.genSalt(10, (err, salt) => {
-      if (err) {
-        return next(err);
-      } else {
-        bcrypt.hash(user.password, salt, (err, hash) => {
-          if (err) {
-            return next(err);
-          } else {
-            user.password = hash;
-            next();
-          }
-        });
-      }
-    });
-  } else {
-    next();
-  }
-});
+userSchema.statics.encpass = function (password,cb) {
+  bcrypt.genSalt(10, (err, salt) => {
+    if (err) {
+      return cb(err);
+    } else {
+      bcrypt.hash(password, salt, (err, hash) => {
+        if (err) {
+          return cb(err);
+        } else {
+          cb(null,hash);
+        }
+      });
+    }
+  });
+}
+// userSchema.pre("save", function (cb) {
+//   var user = this;
+//   if (user.isModified("password")) {
+//     bcrypt.genSalt(10, (err, salt) => {
+//       if (err) {
+//         return cb(err);
+//       } else {
+//         bcrypt.hash(user.password, salt, (err, hash) => {
+//           if (err) {
+//             return cb(err);
+//           } else {
+//             user.password = hash;
+//             cb(null);
+//           }
+//         });
+//       }
+//     });
+//   } else {
+//     cb(null);
+//   }
+// });
 
 userSchema.methods.checkPassword = function (plainPassword, cb) {
   var user = this;

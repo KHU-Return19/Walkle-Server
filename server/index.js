@@ -46,6 +46,8 @@ app.use("/api/projects", require("./routes/projects"));
 app.use("/swagger", swaggerUi.serve, swaggerUi.setup(swaggerFile));
 
 app.use('/api/image',require('./routes/fileupload'));
+
+app.use('/api/mail',require('./routes/mail'));
 app.use('/uploads', express.static('uploads'));
 // app.listen(port,()=>{
 //     console.log(`Server Listening ${port}`)
