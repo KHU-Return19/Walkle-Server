@@ -5,9 +5,12 @@ const autoIncrement = require("mongoose-auto-increment");
 autoIncrement.initialize(mongoose.connection);
 
 const userSchema = mongoose.Schema({
-  userId: {
+  loginId: {
     type: String,
     maxlength: 30,
+  },
+  name:{
+    type:String
   },
   email: {
     type: String,

@@ -6,21 +6,23 @@ const { auth } = require("../middleware/auth");
 
 router.get("/auth", auth, (req, res) => {
   res.json({
-    userId: req.user.userId,
+    loginId: req.user.loginId,
+    name:req.user.name,
     email: req.user.email,
     _id: req.user._id,
   });
-});
+}); 
 
 router.post("/register", (req, res) => {
-  User.findOne({ userId: req.body.userId }, (err, user) => {
+  User.findOne({ loginId: req.body.loginId }, (err, user) => {
     if (err) {
       return res.status(400).json({ msg: err });
     } else if (user) {
       return res.status(400).json({ msg: "Duplicate data exists" });
     } else {
       const user = new User({
-        userId: req.body.userId,
+        loginId: req.body.loginId,
+        name:req.body.name,
         email: req.body.email,
         password: req.body.password,
       });
@@ -37,7 +39,7 @@ router.post("/register", (req, res) => {
   });
 });
 router.post("/login", (req, res) => {
-  User.findOne({ userId: req.body.userId }, (err, user) => {
+  User.findOne({ loginId: req.body.loginId }, (err, user) => {
     if (err) {
       return res.status(400).json({ msg: err });
     } else if (!user) {
@@ -55,7 +57,7 @@ router.post("/login", (req, res) => {
             } else {
               res.cookie("auth", user.token).status(201).json({
                 _id: user._id,
-                userId: user.userId,
+                loginId: user.loginId,
               });
             }
           });

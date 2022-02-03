@@ -13,7 +13,7 @@ const tagSchema = mongoose.Schema({
   },
 });
 const profileSchema = mongoose.Schema({
-  user_uid: {
+  userId: {
     type: mongoose.Schema.Types.ObjectId,
     ref: "User",
   },
@@ -25,7 +25,7 @@ const profileSchema = mongoose.Schema({
   job: {
     type: String,
   },
-  sns_link: {
+  snsLink: {
     type: String,
   },
   intro: {
@@ -51,7 +51,7 @@ const profileSchema = mongoose.Schema({
   tags: [tagSchema],
   fields: [
     {
-      field_uid: {
+      fieldId: {
         type: mongoose.Schema.Types.ObjectId,
         ref: "Field",
       },

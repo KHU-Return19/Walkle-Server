@@ -7,10 +7,10 @@ const { auth } = require('../middleware/auth'); //인증
 
 const getData = (req) => {
     const profile_data = {
-        user_uid: req.user._id,
+        userId: req.user._id,
         nickname: req.body.nickname,
         job: req.body.job,
-        sns_link: req.body.sns_link,
+        snsLink: req.body.snsLink,
         intro: req.body.intro,
         career: req.body.career,
         age: req.body.age,
@@ -23,7 +23,9 @@ const getData = (req) => {
     return { profile_data}
 
 }
-router.post('/field_list',(req,res)=>{
+//db 필드 목록 추가
+router.post('/add_field_list',(req,res)=>{
+    
     var field=new Field(req.body);
     console.log(req.body.field);
     field.save((err,field)=>{
@@ -36,18 +38,19 @@ router.post('/field_list',(req,res)=>{
     })
 })
 //프로필 등록
-router.post('', auth, async (req, res) => {
+router.post('/', auth, async (req, res) => {
     const {profile_data} = getData(req);
     for await (const item of req.body.field) {
-        await Field.findOne({field:item}).then((body)=>{
-            if(body){
-                profile_data.fields.push({field_uid:body._id});
-            }
-        })
+        // await Field.findOne({field:item}).then((body)=>{
+        //     if(body){
+        //         profile_data.fields.push({field_uid:body._id});
+        //     }
+        // })
+        profile_data.fields.push({field_uid:item});
     }
     const profile = new Profile(profile_data);
     //DB에 프로필이 등록되어 있는지 확인.
-    Profile.findOne({ user_uid: req.user._id }, async (err, result) => {
+    Profile.findOne({ userId: req.user._id }, async (err, result) => {
         if (err) {
             return res.status(400).json({ msg: err });
         } else if (result) {
@@ -69,9 +72,9 @@ router.post('', auth, async (req, res) => {
         }
     })
 })
-//프로필 조회
+//프로필_목록 조회
 router.get('/list',(req,res)=>{
-    var user_data={};
+    // var user_data={};
     Profile.find({},(err,profile)=>{
         if(err){
             res.status(400).json({err})
@@ -89,7 +92,7 @@ router.get('/',auth,(req,res)=>{
         }).catch((err)=>res.status(400).json({err}));
     //본인 프로필 조회
     }else{
-        Profile.findOne({user_uid:req.user._id}).then((profile)=>{
+        Profile.findOne({userId:req.user._id}).then((profile)=>{
             res.status(201).json(profile);
         }).catch((err)=>res.status(400).json({err}));
     }
@@ -100,14 +103,15 @@ router.put('/:nickname', auth, (req, res) => {
     Profile.findOne({ nickname: req.params.nickname }, async (err, profile) => {
         if (err) {
             return res.status(400).json({ msg: err });
-        } else if (user._id.equals(profile.user_uid)) {
+        } else if (user._id.equals(profile.userId)) {
             const { profile_data,tag_data} = getData(req);
             for await (const item of req.body.field) {
-                await Field.findOne({field:item}).then((body)=>{
-                    if(body){
-                        profile_data.fields.push({field_uid:body._id});
-                    }
-                })
+                // await Field.findOne({field:item}).then((body)=>{
+                //     if(body){
+                //         profile_data.fields.push({field_uid:body._id});
+                //     }
+                // })
+                profile_data.fields.push({field_uid:item});
             }
             for await (const item of req.body.tag) {
                 profile_data.tags.push({tag:item});
@@ -133,6 +137,15 @@ router.put('/:nickname', auth, (req, res) => {
         }
     })
 })
-//프로필 불러오기
+//전체 필드 조회
+router.get('/field',(req,res)=>{
+  Field.find({},(err,field)=>{
+      if(err){
+          res.status(400).json({err});
+      }else{
+          res.status(201).json(field);
+      }
+  })  
+})
 
 module.exports = router;
