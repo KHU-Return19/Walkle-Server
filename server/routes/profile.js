@@ -119,11 +119,6 @@ router.put('/:nickname', auth, (req, res) => {
         } else if (user._id.equals(profile.userId)) {
             const { profile_data,tag_data} = getData(req);
             for await (const item of req.body.field) {
-                // await Field.findOne({field:item}).then((body)=>{
-                //     if(body){
-                //         profile_data.fields.push({field_uid:body._id});
-                //     }
-                // })
                 profile_data.fields.push({field_uid:item});
             }
             for await (const item of req.body.tag) {

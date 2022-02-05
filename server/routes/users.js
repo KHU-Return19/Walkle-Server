@@ -3,7 +3,7 @@ const router = express.Router();
 
 const { User } = require("../models/User");
 const { auth } = require("../middleware/auth");
-
+const { confirm } = require("../middleware/confirmMail");
 router.get("/auth", auth, (req, res) => {
   res.json({
     loginId: req.user.loginId,
@@ -12,7 +12,7 @@ router.get("/auth", auth, (req, res) => {
     _id: req.user._id,
   });
 });
-router.post('/find_id',(req,res)=>{
+router.post('/find-id',(req,res)=>{
   var name=req.body.name;
   var email=req.body.email;
   User.findOne({name,email},(err,result)=>{
@@ -31,7 +31,7 @@ router.post('/find_id',(req,res)=>{
     }
   })
 })
-router.post('/find_pw',(req,res)=>{
+router.post('/find-pw',(req,res)=>{
   var loginId=req.body.loginId;
   var email=req.body.email;
   var newpassword=req.body.newpassword;
