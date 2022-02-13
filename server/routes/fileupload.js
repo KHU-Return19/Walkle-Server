@@ -13,6 +13,8 @@ var storage = multer.diskStorage({
 })
 var upload = multer({ storage: storage })
 router.post('/', upload.single("file"), (req, res) => {
+    /* 	#swagger.tags = ['Image']
+      #swagger.summary = "이미지 추가" */
     const { originalname, destination, filename, path, size } = req.file;
     console.log("사용자가 업로드한 파일 명 : ", originalname);
     console.log("destinatin에 저장된 파일 명 : ", filename);
@@ -21,6 +23,8 @@ router.post('/', upload.single("file"), (req, res) => {
     res.json({ success: true, data: "Single Upload Ok",filename})
 })
 router.delete('/:imageId',(req,res)=>{
+    /* 	#swagger.tags = ['Image']
+      #swagger.summary = "이미지 제거" */
     console.log(req.params.imageId);
     fs.unlink(`uploads/${req.params.imageId}`,(err)=>{
         if(err){

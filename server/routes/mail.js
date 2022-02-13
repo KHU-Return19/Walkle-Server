@@ -12,6 +12,8 @@ function generateRandomCode(n) {
     return str
 }
 router.post('/',async (req,res)=>{
+    /* 	#swagger.tags = ['Mail']
+      #swagger.summary = "이메일 인증번호 전송" */
     var number=await generateRandomCode(6);
     console.log(number);
     sendMail(req.body.email,"Wakle 이메일 인증",`인증번호는 ${number} 입니다.`,function(err,info){

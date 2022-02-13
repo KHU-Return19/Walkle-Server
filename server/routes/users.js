@@ -5,6 +5,8 @@ const { User } = require("../models/User");
 const { auth } = require("../middleware/auth");
 const { confirm } = require("../middleware/confirmMail");
 router.get("/auth", auth, (req, res) => {
+  /* 	#swagger.tags = ['User']
+      #swagger.summary = "사용자 인증" */
   res.json({
     loginId: req.user.loginId,
     name:req.user.name,
@@ -13,6 +15,8 @@ router.get("/auth", auth, (req, res) => {
   });
 });
 router.post('/find-id',(req,res)=>{
+  /* 	#swagger.tags = ['User']
+      #swagger.summary = "아이디 찾기" */
   var name=req.body.name;
   var email=req.body.email;
   User.findOne({name,email},(err,result)=>{
@@ -31,7 +35,9 @@ router.post('/find-id',(req,res)=>{
     }
   })
 })
-router.post('/find-pw',(req,res)=>{
+router.post('/find-pw',confirm,(req,res)=>{
+  /* 	#swagger.tags = ['User']
+      #swagger.summary = "비밀번호 변경" */
   var loginId=req.body.loginId;
   var email=req.body.email;
   var newpassword=req.body.newpassword;
@@ -61,7 +67,9 @@ router.post('/find-pw',(req,res)=>{
     }
   })
 })
-router.post("/register", (req, res) => {
+router.post("/register", confirm,(req, res) => {
+  /* 	#swagger.tags = ['User']
+      #swagger.summary = "회원가입" */
   User.findOne({ loginId: req.body.loginId }, (err, user) => {
     if (err) {
       return res.status(400).json({ msg: err });
@@ -94,6 +102,8 @@ router.post("/register", (req, res) => {
   });
 });
 router.post("/login", (req, res) => {
+  /* 	#swagger.tags = ['User']
+      #swagger.summary = "로그인" */
   User.findOne({ loginId: req.body.loginId }, (err, user) => {
     if (err) {
       return res.status(400).json({ msg: err });
@@ -123,6 +133,8 @@ router.post("/login", (req, res) => {
 });
 
 router.get("/logout", auth, (req, res) => {
+  /* 	#swagger.tags = ['User']
+      #swagger.summary = "로그아웃" */
   User.findOneAndUpdate({ _id: req.user._id }, { token: "" }, (err, doc) => {
     if (err) return res.json({ msg: err });
     return res.json({
@@ -133,6 +145,8 @@ router.get("/logout", auth, (req, res) => {
 
 // TODO remove
 router.get("/all", (req, res) => {
+  /* 	#swagger.tags = ['User']
+      #swagger.summary = "전체 유저 조회" */
   User.find((err, users) => {
     res.json(users);
   });
