@@ -52,7 +52,7 @@ router.post("/", auth, async (req, res) => {
     } else if (result) {
       return res.status(400).json({ msg: "이미 프로필이 등록 되어 있습니다." });
     } else {
-      profile.tags.push(...req.body.tag);
+      // profile.tags.push(...req.body.tag);
       console.log(req.body.tag);
       profile.location.push(...req.body.location);
       profile.save((err, profile) => {
