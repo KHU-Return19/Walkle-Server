@@ -66,7 +66,6 @@ communitySchema.methods.updateViews = function (cb) {
 
 const Community = mongoose.model("Community", communitySchema);
 const Comment = mongoose.model("Comment", commentSchema);
-
 const Heart = mongoose.model("Heart", heartSchema);
 
 module.exports = { Community, Comment, Heart };
