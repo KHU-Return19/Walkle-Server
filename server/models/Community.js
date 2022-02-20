@@ -52,6 +52,7 @@ const communitySchema = mongoose.Schema({
     type: Date,
     default: Date.now,
   },
+  images: [{ image: String }],
   comments: [commentSchema],
   hearts: [heartSchema],
 });

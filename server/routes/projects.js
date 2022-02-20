@@ -11,10 +11,7 @@ const { response } = require("express");
 // 프로젝트 게시글 조회
 router.get("/posts/:id", auth, async (req, res) => {
   const projectId = req.params.id;
-  const project = await Project.findOne({ _id: projectId }).populate(
-    "categories.categoryId",
-    { _id: 1, name: 2 }
-  );
+  const project = await Project.findOne({ _id: projectId }).populate("categories.categoryId", { _id: 1, name: 2 });
 
   if (!project) {
     return res.status(400).json({ msg: "Project Not Found" });
@@ -30,9 +27,7 @@ router.get("/posts/:id", auth, async (req, res) => {
 router.get("/posts", auth, async (req, res) => {
   /* 	#swagger.tags = ['Project']
       #swagger.summary = "프로젝트 게시글 목록 조회"*/
-  const projects = await Project.find()
-    .sort({ createdAt: -1 })
-    .populate("categories.categoryId", { _id: 1, name: 2 });
+  const projects = await Project.find().sort({ createdAt: -1 }).populate("categories.categoryId", { _id: 1, name: 2 });
   const response = await projectListRes(projects, req.user._id);
 
   return res.status(200).json({ project: response });
