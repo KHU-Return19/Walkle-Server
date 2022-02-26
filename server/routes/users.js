@@ -4,6 +4,7 @@ const router = express.Router();
 const { User } = require("../models/User");
 const { auth } = require("../middleware/auth");
 const { confirm } = require("../middleware/confirmMail");
+
 router.get("/auth", auth, (req, res) => {
   /* 	#swagger.tags = ['User']
       #swagger.summary = "사용자 인증" */

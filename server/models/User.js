@@ -9,12 +9,8 @@ const userSchema = mongoose.Schema({
     type: String,
     maxlength: 30,
   },
-  name: {
-    type: String
-  },
   email: {
     type: String,
-    unique: true,
   },
   password: {
     type: String,
@@ -38,27 +34,27 @@ userSchema.statics.encpass = function (password,cb) {
     }
   });
 }
-// userSchema.pre("save", function (cb) {
-//   var user = this;
-//   if (user.isModified("password")) {
-//     bcrypt.genSalt(10, (err, salt) => {
-//       if (err) {
-//         return cb(err);
-//       } else {
-//         bcrypt.hash(user.password, salt, (err, hash) => {
-//           if (err) {
-//             return cb(err);
-//           } else {
-//             user.password = hash;
-//             cb(null);
-//           }
-//         });
-//       }
-//     });
-//   } else {
-//     cb(null);
-//   }
-// });
+userSchema.pre("save", function (next) {
+  var user = this;
+  if (user.isModified("password")) {
+    bcrypt.genSalt(10, (err, salt) => {
+      if (err) {
+        return next(err);
+      } else {
+        bcrypt.hash(user.password, salt, (err, hash) => {
+          if (err) {
+            return next(err);
+          } else {
+            user.password = hash;
+            next();
+          }
+        });
+      }
+    });
+  } else {
+    next();
+  }
+});
 
 userSchema.methods.checkPassword = function (plainPassword, cb) {
   var user = this;
@@ -89,7 +85,7 @@ userSchema.statics.findByToken = function (token, cb) {
   var user = this;
   jwt.verify(token, process.env.SECRET_KEY, (err, decode) => {
     user.findOne({ _id: decode, token: token }, (err, user) => {
-      if (err) {
+      if (err) {  
         return cb(err);
       } else {
         cb(null, user);
