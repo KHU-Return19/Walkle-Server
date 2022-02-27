@@ -34,28 +34,6 @@ userSchema.statics.encpass = function (password,cb) {
     }
   });
 }
-userSchema.pre("save", function (next) {
-  var user = this;
-  if (user.isModified("password")) {
-    bcrypt.genSalt(10, (err, salt) => {
-      if (err) {
-        return next(err);
-      } else {
-        bcrypt.hash(user.password, salt, (err, hash) => {
-          if (err) {
-            return next(err);
-          } else {
-            user.password = hash;
-            next();
-          }
-        });
-      }
-    });
-  } else {
-    next();
-  }
-});
-
 userSchema.methods.checkPassword = function (plainPassword, cb) {
   var user = this;
   bcrypt.compare(plainPassword, user.password, (err, isMatch) => {
