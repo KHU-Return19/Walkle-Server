@@ -76,7 +76,7 @@ const projectSchema = mongoose.Schema({
     type: Date,
     default: Date.now,
   },
-  tags: [{ name: String }],
+  tags: [{ tag: String }],
   members: [memberSchema],
   applicants: [applicantSchema],
   categories: [
