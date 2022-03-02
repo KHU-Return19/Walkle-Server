@@ -72,6 +72,8 @@ router.post('/find-pw',confirm,(req,res)=>{
 });
 
 router.post("/kakao-login", async (req, res) => {
+  /* 	#swagger.tags = ['User']
+      #swagger.summary = "카카오 로그인" */
   axios
     .post(
       "https://kauth.kakao.com/oauth/token",
