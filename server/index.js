@@ -4,11 +4,14 @@ const express = require("express");
 const app = express();
 const cors = require("cors");
 
-require("dotenv").config();
-const port = 8000;
-const http = require("http").createServer(app);
-const io = require("socket.io")(http);
-require("./socket")(io);
+const path = require('path'); 
+require('dotenv').config({ path: path.join(__dirname, '../.env') });
+const port = process.env.PORT || 5000;
+const http=require('http').createServer(app);
+const io=require('socket.io')(http);
+require('./socket')(io);
+
+
 
 const bodyParser = require("body-parser");
 const cookieParser = require("cookie-parser");
