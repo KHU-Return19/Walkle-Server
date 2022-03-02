@@ -25,7 +25,8 @@ const getData = (req) => {
 }
 //db 필드 목록 추가
 router.post('/add_field_list',(req,res)=>{
-    
+    /* 	#swagger.tags = ['Profile']
+      #swagger.summary = "DB 필드 목록 추가" */
     var field=new Field(req.body);
     console.log(req.body.field);
     field.save((err,field)=>{
@@ -38,6 +39,8 @@ router.post('/add_field_list',(req,res)=>{
     })
 })
 router.get('/check_nickname',(req,res)=>{
+    /* 	#swagger.tags = ['Profile']
+      #swagger.summary = "닉네임 중복 확인" */
     Profile.findOne({nickname:req.query.nickname},(err,result)=>{
         if(err){
             res.status(400).json(err);
@@ -52,6 +55,8 @@ router.get('/check_nickname',(req,res)=>{
 })
 //프로필 등록
 router.post('/', auth, async (req, res) => {
+    /* 	#swagger.tags = ['Profile']
+      #swagger.summary = "프로필 등록" */
     const {profile_data} = getData(req);
     for await (const item of req.body.field) {
         // await Field.findOne({field:item}).then((body)=>{
@@ -87,6 +92,8 @@ router.post('/', auth, async (req, res) => {
 })
 //프로필_목록 조회
 router.get('/list',(req,res)=>{
+    /* 	#swagger.tags = ['Profile']
+      #swagger.summary = "프로필 목록 조회" */
     // var user_data={};
     Profile.find({},(err,profile)=>{
         if(err){
@@ -98,6 +105,8 @@ router.get('/list',(req,res)=>{
 })
 //프로필 상세 조회
 router.get('/',auth,(req,res)=>{
+    /* 	#swagger.tags = ['Profile']
+      #swagger.summary = "프로필 상세 조회" */
     //다른 사람 프로필 조회
     if(req.query.nickname){
         Profile.findOne({nickname:req.query.nickname}).then((profile)=>{
@@ -112,6 +121,8 @@ router.get('/',auth,(req,res)=>{
 })
 //프로필 수정
 router.put('/:nickname', auth, (req, res) => {
+    /* 	#swagger.tags = ['Profile']
+      #swagger.summary = "프로필 수정" */
     var user = req.user;
     Profile.findOne({ nickname: req.params.nickname }, async (err, profile) => {
         if (err) {
@@ -147,6 +158,8 @@ router.put('/:nickname', auth, (req, res) => {
 })
 //전체 필드 조회
 router.get('/field',(req,res)=>{
+    /* 	#swagger.tags = ['Profile']
+      #swagger.summary = "분야 리스트 조회" */
   Field.find({},(err,field)=>{
       if(err){
           res.status(400).json({err});

@@ -3,8 +3,8 @@ const swaggerFile = require("../swagger-output");
 const express = require("express");
 const app = express();
 const cors = require("cors");
-
-require("dotenv").config();
+const path = require('path'); 
+require('dotenv').config({ path: path.join(__dirname, '../.env') });
 const port = process.env.PORT || 5000;
 const http=require('http').createServer(app);
 const io=require('socket.io')(http);
