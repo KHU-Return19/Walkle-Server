@@ -2,10 +2,11 @@
 const express = require('express');
 const router = express.Router();
 var fs=require('fs');
+const path = require('path');
 const multer = require('multer');
 var storage = multer.diskStorage({
     destination: function (req, file, cb) {
-        cb(null, 'uploads/')
+        cb(null, path.join(__dirname, '../../uploads/'))
     },
     filename: function (req, file, cb) {
         cb(null, `${Date.now()}_${file.originalname.split('.')[0]}.png`)
@@ -13,8 +14,8 @@ var storage = multer.diskStorage({
 })
 var upload = multer({ storage: storage })
 router.post('/', upload.single("file"), (req, res) => {
-    /* 	#swagger.tags = ['Image']
-      #swagger.summary = "이미지 추가" */
+    // /* 	#swagger.tags = ['Image']
+    //   #swagger.summary = "이미지 추가" */
     const { originalname, destination, filename, path, size } = req.file;
     console.log("사용자가 업로드한 파일 명 : ", originalname);
     console.log("destinatin에 저장된 파일 명 : ", filename);
