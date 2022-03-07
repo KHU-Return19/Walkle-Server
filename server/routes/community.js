@@ -203,7 +203,7 @@ router.put("/:id", auth, postPermission, async (req, res) => {
   return res.status(200).json({ community: req.community.id });
 });
 
-router.delete(":id", auth, postPermission, (req, res) => {
+router.delete("/:id", auth, postPermission, (req, res) => {
   /* 	#swagger.tags = ['Community']
       #swagger.summary = "커뮤니티 게시글 삭제" */
   const community = req.community;
