@@ -76,7 +76,7 @@ router.post('/', auth, async (req, res) => {
         } else {
             // profile.tags.push(...req.body.tag); 
             // console.log(req.body.tag);
-            for await (const item of req.body.tag) {
+            for await (const item of req.body.tags) {
                 profile_data.tags.push({tag:item});
             }
             profile.location.push(...req.body.location);
@@ -125,6 +125,8 @@ router.put('/:nickname', auth, (req, res) => {
       #swagger.summary = "프로필 수정" */
     var user = req.user;
     Profile.findOne({ nickname: req.params.nickname }, async (err, profile) => {
+        console.log(profile);
+        console.log(profile.userId);
         if (err) {
             return res.status(400).json({ msg: err });
         } else if (user._id.equals(profile.userId)) {
@@ -132,7 +134,7 @@ router.put('/:nickname', auth, (req, res) => {
             for await (const item of req.body.field) {
                 profile_data.fields.push({field_uid:item});
             }
-            for await (const item of req.body.tag) {
+            for await (const item of req.body.tags) {
                 profile_data.tags.push({tag:item});
             }
             Profile.findOneAndReplace({ nickname: req.params.nickname }, profile_data, { returnDocument: true }, (err, profile) => {
