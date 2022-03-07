@@ -57,7 +57,7 @@ web_modules/
 
 # Optional npm cache directory
 .npm
-
+/uploads
 # Optional eslint cache
 .eslintcache
 
