@@ -6,7 +6,7 @@ const auth = (req, res, next) => {
   User.findByToken(token, (err, user) => {
     if (err) throw err;
     if (!user) {
-      return res.json({
+      return res.status(401).json({
         msg: "authentication failed",
       });
     } else {

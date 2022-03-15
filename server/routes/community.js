@@ -80,7 +80,7 @@ router.post("/:id/hearts", auth, (req, res) => {
 
       if (heart.length === 0) {
         // 공감
-        const numOfHeart = community.hearts.push(newHeart);
+        community.hearts.push(newHeart);
 
         community.save((err, saved) => {
           if (err) {
@@ -106,10 +106,10 @@ router.post("/:id/hearts", auth, (req, res) => {
 router.get("/users/hearts", auth, async (req, res) => {
   /* 	#swagger.tags = ['Community']
       #swagger.summary = "공감한 커뮤니티 게시글 조회"*/
-  const userId = req.query.userId;
+  const userId = req.user._id;
 
-  if (userId == null) {
-    userId = req.user._id;
+  if (req.query.userId != null) {
+    userId = req.query.userId;
   }
 
   const communities = await Community.find({ "hearts.userId": userId }).sort({
