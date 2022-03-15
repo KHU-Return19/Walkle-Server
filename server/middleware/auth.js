@@ -1,20 +1,18 @@
-const { User } = require('../models/User');
+const { User } = require("../models/User");
 
 const auth = (req, res, next) => {
-  var token = req.cookies.auth;
-    console.log(token);
+  const token = req.cookies.auth;
+
   User.findByToken(token, (err, user) => {
     if (err) throw err;
-    if (!user){
-      return res.json({
-        isAuth: false,
-        msg: "인증 실패 :P"
+    if (!user) {
+      return res.status(401).json({
+        msg: "authentication failed",
       });
-    }
-    else{
-    req.user = user;
-    req.token = token;
-    next();
+    } else {
+      req.user = user;
+      req.token = token;
+      next();
     }
   });
 };

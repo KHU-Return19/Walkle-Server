@@ -1,10 +1,11 @@
 const mongoose=require('mongoose');
 
 const fieldSchema=mongoose.Schema({
-    profileid:{
-        type:mongoose.Schema.Types.ObjectId,
-        ref:'Profile',
-    },
+    field:{
+        type:String,
+        required:true,
+    }
 })
+const Field=mongoose.model('Field',fieldSchema);
+module.exports={Field};
 
-module.exports={fieldSchema};
