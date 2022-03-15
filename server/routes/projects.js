@@ -267,13 +267,6 @@ router.put("/:id", auth, postPermission, async (req, res) => {
     });
   }
 
-  // 참가자
-  update.members = [];
-  for (const memberId of req.body.memberIdList) {
-    update.members.push({
-      userId: memberId,
-    });
-  }
   await Project.updateOne({ _id: projectId }, update);
   return res.status(200).json({ projectId: projectId });
 });
@@ -318,6 +311,12 @@ router.post("/", auth, (req, res) => {
       categoryId: cateogryId,
     });
   }
+
+  // 작성자 참가자 추가
+  newProject.members = [];
+  newProject.members.push({
+    userId: req.user._id,
+  });
 
   newProject.save((err, project) => {
     if (err) {
@@ -402,11 +401,8 @@ const projectRes = async (project, userId) => {
   response.categories = categories;
 
   // 북마크
-  const bookmark = await Project.find({
-    _id: project._id,
-    "bookmarks.userId": userId,
-  }).sort({ createdAt: -1 });
-  if (!bookmark) {
+  const bookmark = project.bookmarks.filter((e) => userId.equals(e.userId));
+  if (bookmark.length === 0) {
     response.isBookmarked = false;
   } else {
     response.isBookmarked = true;

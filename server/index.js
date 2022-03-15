@@ -4,14 +4,12 @@ const express = require("express");
 const app = express();
 const cors = require("cors");
 
-const path = require('path'); 
-require('dotenv').config({ path: path.join(__dirname, '../.env') });
+const path = require("path");
+require("dotenv").config({ path: path.join(__dirname, "../.env") });
 const port = process.env.PORT || 5000;
-const http=require('http').createServer(app);
-const io=require('socket.io')(http);
-require('./socket')(io);
-
-
+const http = require("http").createServer(app);
+const io = require("socket.io")(http);
+require("./socket")(io);
 
 const bodyParser = require("body-parser");
 const cookieParser = require("cookie-parser");
@@ -48,8 +46,8 @@ app.use("/swagger", swaggerUi.serve, swaggerUi.setup(swaggerFile));
 
 app.use("/api/image", require("./routes/fileupload"));
 
-app.use('/api/mail',require('./routes/mail'));
-app.use('/uploads',express.static(path.join(__dirname+"/../uploads")));
+app.use("/api/mail", require("./routes/mail"));
+app.use("/uploads", express.static(path.join(__dirname + "/../uploads")));
 
 // app.listen(port,()=>{
 //     console.log(`Server Listening ${port}`)
